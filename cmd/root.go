@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -32,7 +33,10 @@ var rootCmd = &cobra.Command{
 	Use:   "EMM-MoneyBox",
 	Short: "Basic Commond",
 	Long:  `Welcome to EMM-MoneyBox.`,
-	// Run: func(cmd *cobra.Command, args []string) {fmt.Println("Hello World.")}
+	Run: func(cmd *cobra.Command, args []string) {
+		util.Init()
+		util.Read()
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
