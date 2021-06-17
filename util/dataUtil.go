@@ -8,14 +8,56 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 )
 
-type Room struct {
-	Name   string `xml:"name,attr"`
+type CashFlow struct {
+	Title  string `xml:"name,attr"`
+	Amount float32
 	Desc   string
-	Member []string
+}
+
+type DayCashFlow struct {
+	Date          string
+	CashFlowArray []CashFlow
+}
+
+type UserConfig struct {
+	UserName   string
+	DayLimit   float32
+	MonthLimit float32
+}
+
+type DataModel struct {
+	UserConfig       UserConfig
+	DayCashFlowArray []DayCashFlow
 }
 
 func Init() {
-	initData := []Room{{"308", "Five Men Family", []string{"Emmettwoo", "Gaspiller", "CZ_CS", "Safina", "CDFeng"}}, {"309", "Single Dog", []string{"LuLuLu"}}}
+	userConfig := UserConfig{
+		UserName:   "Emmett Woo",
+		DayLimit:   50,
+		MonthLimit: 2000,
+	}
+
+	dayCashFlow := DayCashFlow{
+		Date: "2021-06-17",
+		CashFlowArray: []CashFlow{
+			{
+				Title:  "Initial First",
+				Amount: 0,
+				Desc:   "Initial User Data With Zero CashFlow",
+			},
+			{
+				Title:  "Initial Second",
+				Amount: 0,
+				Desc:   "Initial User Data With Zero CashFlow",
+			},
+		},
+	}
+
+	initData := DataModel{
+		UserConfig:       userConfig,
+		DayCashFlowArray: []DayCashFlow{dayCashFlow},
+	}
+
 	// 创建文件
 	filePtr, err := os.OpenFile(getDataFilePath(), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
@@ -39,22 +81,24 @@ func Read() {
 		return
 	}
 	defer filePtr.Close()
-	var dataArray []Room
-	// 创建json解码器
+
+	// 缺点是每一次都得把完整数据读取出来，数据多了以后严重影响读取速度
+	var dataModel DataModel
 	decoder := json.NewDecoder(filePtr)
-	err = decoder.Decode(&dataArray)
+	err = decoder.Decode(&dataModel)
 	if err != nil {
 		fmt.Println("错误: 用户数据读取失败: ", err.Error())
 	} else {
-		for _, data := range dataArray {
-			fmt.Println(data.Name)
-			for _, member := range data.Member {
-				fmt.Println(member)
+		// 遍历用户每日现金流数据并直接输出
+		fmt.Printf("\n*** %s ***\n", dataModel.UserConfig.UserName)
+		for _, dayCashFlow := range dataModel.DayCashFlowArray {
+			fmt.Printf("\n@ %s\n", dayCashFlow.Date)
+			for _, cashFlow := range dayCashFlow.CashFlowArray {
+				fmt.Println(cashFlow.Title, ": ", cashFlow.Amount)
 			}
-			fmt.Println()
 		}
-		// fmt.Println(dataArray)
 	}
+	fmt.Println("\n*** The End ***")
 }
 
 func getDataFilePath() string {
