@@ -46,7 +46,14 @@ func Read() {
 	if err != nil {
 		fmt.Println("错误: 用户数据读取失败: ", err.Error())
 	} else {
-		fmt.Println(dataArray)
+		for _, data := range dataArray {
+			fmt.Println(data.Name)
+			for _, member := range data.Member {
+				fmt.Println(member)
+			}
+			fmt.Println()
+		}
+		// fmt.Println(dataArray)
 	}
 }
 
