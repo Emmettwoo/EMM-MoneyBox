@@ -5,41 +5,21 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/emmettwoo/EMM-MoneyBox/model"
+
 	homedir "github.com/mitchellh/go-homedir"
 )
 
-type CashFlow struct {
-	Title  string `xml:"name,attr"`
-	Amount float32
-	Desc   string
-}
-
-type DayCashFlow struct {
-	Date          string
-	CashFlowArray []CashFlow
-}
-
-type UserConfig struct {
-	UserName   string
-	DayLimit   float32
-	MonthLimit float32
-}
-
-type DataModel struct {
-	UserConfig       UserConfig
-	DayCashFlowArray []DayCashFlow
-}
-
 func Init() {
-	userConfig := UserConfig{
+	userConfig := model.UserConfig{
 		UserName:   "Emmett Woo",
 		DayLimit:   50,
 		MonthLimit: 2000,
 	}
 
-	dayCashFlow := DayCashFlow{
+	dayCashFlow := model.DayCashFlow{
 		Date: "2021-06-17",
-		CashFlowArray: []CashFlow{
+		CashFlowArray: []model.CashFlow{
 			{
 				Title:  "Initial First",
 				Amount: 0,
@@ -53,9 +33,9 @@ func Init() {
 		},
 	}
 
-	initData := DataModel{
+	initData := model.DataModel{
 		UserConfig:       userConfig,
-		DayCashFlowArray: []DayCashFlow{dayCashFlow},
+		DayCashFlowArray: []model.DayCashFlow{dayCashFlow},
 	}
 
 	// 创建文件
@@ -83,7 +63,7 @@ func Read() {
 	defer filePtr.Close()
 
 	// 缺点是每一次都得把完整数据读取出来，数据多了以后严重影响读取速度
-	var dataModel DataModel
+	var dataModel model.DataModel
 	decoder := json.NewDecoder(filePtr)
 	err = decoder.Decode(&dataModel)
 	if err != nil {
@@ -102,7 +82,7 @@ func Read() {
 }
 
 func getDataFilePath() string {
-	dataFileName := ".emm-moneybox.json"
+	dataFileName := ".EMM-MoneyBox.json"
 	home, err := homedir.Dir()
 	if err != nil {
 		fmt.Printf("错误: 获取用户目录失败: %v\n", err)
