@@ -1,7 +1,9 @@
 package model
 
-type CashFlow struct {
-	Title  string `xml:"name,attr"`
-	Amount float32
-	Desc   string
+type cashFlowEntity struct {
+	_id      string
+	category string
+	amount   float64
+	desc     string
+	remark   string
 }

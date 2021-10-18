@@ -16,7 +16,10 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/emmettwoo/EMM-MoneyBox/util"
+	"fmt"
+	"time"
+
+	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -31,8 +34,8 @@ var rootCmd = &cobra.Command{
 	Short: "Basic Commond",
 	Long:  `Welcome to EMM-MoneyBox.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		util.Init()
-		util.Read()
+		dayFlowEntity := model.GetDayFlowEntity(time.Now())
+		fmt.Println(dayFlowEntity)
 	},
 }
 

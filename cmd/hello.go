@@ -18,10 +18,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/spf13/cobra"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // helloCmd represents the hello command
@@ -36,15 +33,6 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Hello Wolrd!")
-
-		util.OpenConnection("cash")
-
-		// filter := bson.D{primitive.E{Key: "year", Value: "2021"}, primitive.E{Key: "month", Value: "10"}, primitive.E{Key: "day", Value: "17"}}
-		filter := bson.D{primitive.E{Key: "flows.0.title", Value: "太二"}}
-		results := util.QueryMany(filter)
-		for _, result := range results {
-			fmt.Println(result)
-		}
 	},
 }
 

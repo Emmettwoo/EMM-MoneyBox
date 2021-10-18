@@ -10,18 +10,32 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const DEFAULT_DATABASE_URL string = "mongodb://emmettwoo:emmettwoo@cluster0-shard-00-00.it4fc.mongodb.net:27017,cluster0-shard-00-01.it4fc.mongodb.net:27017,cluster0-shard-00-02.it4fc.mongodb.net:27017/hello-vercel?replicaSet=atlas-13kbxi-shard-0&ssl=true&authSource=admin"
-const DEFAULT_DATABASE_NAME string = "emm-money-box"
+var DEFAULT_DATABASE_URI string
+var DEFAULT_DATABASE_NAME string
 
 var client *mongo.Client
 var collection *mongo.Collection
 var isConnected bool = false
 
+// 初始化數據庫參數
+func init() {
+	DEFAULT_DATABASE_URI = "mongodb://emmettwoo:yGPmks4ESYxBiSUE@cluster0-shard-00-00.it4fc.mongodb.net:27017,cluster0-shard-00-01.it4fc.mongodb.net:27017,cluster0-shard-00-02.it4fc.mongodb.net:27017/test?replicaSet=atlas-13kbxi-shard-0&ssl=true&authSource=admin"
+	// DEFAULT_DATABASE_URI = os.Getenv("MONGO_DB_URI")
+	DEFAULT_DATABASE_NAME = "emm-money-box"
+}
+
 // 開啓數據庫連綫
 func OpenConnection(collectionName string) {
 
+	// 檢查數據庫配置
+	if DEFAULT_DATABASE_URI == "" {
+		log.Fatal("Environment Value 'MONGO_DB_URI' not set.")
+	} else {
+		log.Print("Using MONGO_DB_URI: " + DEFAULT_DATABASE_URI)
+	}
+
 	// 定義數據庫連綫
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(DEFAULT_DATABASE_URL))
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(DEFAULT_DATABASE_URI))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,7 +64,6 @@ func checkConnection() {
 // 獲取單條數據
 func QueryOne(filter bson.D) bson.M {
 
-	fmt.Println(filter)
 	checkConnection()
 
 	var result bson.M
