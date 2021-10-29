@@ -85,7 +85,7 @@ func QueryMany(filter bson.D) []bson.M {
 
 	checkConnection()
 
-	var results []bson.M
+	var resultInBsonArray []bson.M
 	cursor, err := collection.Find(context.TODO(), filter)
 
 	// 查詢失敗處理
@@ -95,9 +95,9 @@ func QueryMany(filter bson.D) []bson.M {
 		log.Fatal(err)
 	}
 
-	if err := cursor.All(context.TODO(), &results); err != nil {
+	if err := cursor.All(context.TODO(), &resultInBsonArray); err != nil {
 		log.Fatal(err)
 	}
 
-	return results
+	return resultInBsonArray
 }
