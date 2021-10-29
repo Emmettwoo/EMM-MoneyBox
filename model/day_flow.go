@@ -44,7 +44,3 @@ func GetDayFlowByDate(date time.Time) DayFlowEntity {
 
 	return entity
 }
-
-func ToString() {
-
-}

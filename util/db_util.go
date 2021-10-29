@@ -31,7 +31,7 @@ func OpenConnection(collectionName string) {
 	if DEFAULT_DATABASE_URI == "" {
 		log.Fatal("Environment Value 'MONGO_DB_URI' not set.")
 	} else {
-		log.Output(0, "Connection established.")
+		// log.Output(0, "Connection established.")
 		// log.Print("Using MONGO_DB_URI: " + DEFAULT_DATABASE_URI)
 	}
 
@@ -52,7 +52,7 @@ func CloseConnection() {
 		panic(err)
 	}
 	isConnected = false
-	log.Output(0, "Connection closed.")
+	// log.Output(0, "Connection closed.")
 }
 
 // 檢查數據庫連綫
