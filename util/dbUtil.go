@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,8 +20,7 @@ var isConnected bool = false
 
 // 初始化數據庫參數
 func init() {
-	DEFAULT_DATABASE_URI = "mongodb://emmettwoo:yGPmks4ESYxBiSUE@cluster0-shard-00-00.it4fc.mongodb.net:27017,cluster0-shard-00-01.it4fc.mongodb.net:27017,cluster0-shard-00-02.it4fc.mongodb.net:27017/test?replicaSet=atlas-13kbxi-shard-0&ssl=true&authSource=admin"
-	// DEFAULT_DATABASE_URI = os.Getenv("MONGO_DB_URI")
+	DEFAULT_DATABASE_URI = os.Getenv("MONGO_DB_URI")
 	DEFAULT_DATABASE_NAME = "emm-money-box"
 }
 
@@ -31,7 +31,8 @@ func OpenConnection(collectionName string) {
 	if DEFAULT_DATABASE_URI == "" {
 		log.Fatal("Environment Value 'MONGO_DB_URI' not set.")
 	} else {
-		log.Print("Using MONGO_DB_URI: " + DEFAULT_DATABASE_URI)
+		log.Output(0, "Connection established.")
+		// log.Print("Using MONGO_DB_URI: " + DEFAULT_DATABASE_URI)
 	}
 
 	// 定義數據庫連綫
@@ -47,11 +48,11 @@ func OpenConnection(collectionName string) {
 
 // 關閉數據庫連綫
 func CloseConnection() {
-	log.Output(0, "Connection closed.")
 	if err := client.Disconnect(context.TODO()); err != nil {
 		panic(err)
 	}
 	isConnected = false
+	log.Output(0, "Connection closed.")
 }
 
 // 檢查數據庫連綫
@@ -66,8 +67,8 @@ func QueryOne(filter bson.D) bson.M {
 
 	checkConnection()
 
-	var result bson.M
-	err := collection.FindOne(context.TODO(), filter).Decode(&result)
+	var resultInBson bson.M
+	err := collection.FindOne(context.TODO(), filter).Decode(&resultInBson)
 
 	// 查詢失敗處理
 	if err == mongo.ErrNoDocuments {
@@ -76,7 +77,7 @@ func QueryOne(filter bson.D) bson.M {
 		log.Fatal(err)
 	}
 
-	return result
+	return resultInBson
 }
 
 // 獲取多條數據
@@ -89,7 +90,7 @@ func QueryMany(filter bson.D) []bson.M {
 
 	// 查詢失敗處理
 	if err == mongo.ErrNoDocuments {
-		fmt.Println("Record does not exist")
+		fmt.Println("Records does not exist")
 	} else if err != nil {
 		log.Fatal(err)
 	}
@@ -97,5 +98,6 @@ func QueryMany(filter bson.D) []bson.M {
 	if err := cursor.All(context.TODO(), &results); err != nil {
 		log.Fatal(err)
 	}
+
 	return results
 }
