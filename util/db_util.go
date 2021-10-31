@@ -46,7 +46,7 @@ func OpenConnection(collectionName string) {
 	isConnected = true
 }
 
-// 關閉數據庫連綫
+// 關閉數據庫連綫 FIXME: 存在空指針問題
 func CloseConnection() {
 	if err := client.Disconnect(context.TODO()); err != nil {
 		panic(err)
@@ -62,7 +62,6 @@ func checkConnection() {
 	}
 }
 
-// 獲取單條數據
 func QueryOne(filter bson.D) bson.M {
 
 	checkConnection()
@@ -80,7 +79,6 @@ func QueryOne(filter bson.D) bson.M {
 	return resultInBson
 }
 
-// 獲取多條數據
 func QueryMany(filter bson.D) []bson.M {
 
 	checkConnection()
@@ -102,7 +100,6 @@ func QueryMany(filter bson.D) []bson.M {
 	return resultInBsonArray
 }
 
-// 插入一條數據
 func InsertOne(data bson.D) primitive.ObjectID {
 
 	checkConnection()
@@ -120,16 +117,55 @@ func InsertOne(data bson.D) primitive.ObjectID {
 	return result.InsertedID.(primitive.ObjectID)
 }
 
-// 更新一條數據
+// Deprecated: use UpdateMany() instead.
 func UpdateOne(filter bson.D, data bson.D) bool {
 
 	checkConnection()
 
-	// Upsert disable by default.
+	// If the filter matches multiple documents, one will be selected from the matched set and MatchedCount will equal 1.
 	result, err := collection.UpdateOne(context.TODO(), filter, data)
 	if err != nil {
 		panic(err)
 	}
 
 	return result.ModifiedCount == 1
+}
+
+func UpdateMany(filter bson.D, data bson.D) int64 {
+
+	checkConnection()
+
+	// Upsert disable by default.
+	result, err := collection.UpdateMany(context.TODO(), filter, data)
+	if err != nil {
+		panic(err)
+	}
+
+	return result.ModifiedCount
+}
+
+// Deprecated: use DeleteMany() instead.
+func DeleteOne(filter bson.D) bool {
+
+	checkConnection()
+
+	// If the filter matches multiple documents, one will be selected from the matched set.
+	result, err := collection.DeleteOne(context.TODO(), filter)
+	if err != nil {
+		panic(err)
+	}
+
+	return result.DeletedCount == 1
+}
+
+func DeleteMany(filter bson.D) int64 {
+
+	checkConnection()
+
+	result, err := collection.DeleteOne(context.TODO(), filter)
+	if err != nil {
+		panic(err)
+	}
+
+	return result.DeletedCount
 }

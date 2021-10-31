@@ -1,6 +1,7 @@
 package model
 
 import (
+	"log"
 	"reflect"
 	"strconv"
 	"time"
@@ -49,6 +50,11 @@ func GetDayFlowByDate(date time.Time) DayFlowEntity {
 	return convertBsonM2DayFlowEntity(util.QueryOne(filter))
 }
 
+func InsertDayFlowByEntity(entity DayFlowEntity) primitive.ObjectID {
+	util.OpenConnection("dayFlow")
+	return util.InsertOne(convertDayFlowEntity2BsonD(entity))
+}
+
 func InsertDayFlowByDate(date time.Time) primitive.ObjectID {
 
 	monthInInt, _ := strconv.Atoi(date.Format("01"))
@@ -73,7 +79,44 @@ func UpdateDayFlowByEntity(entity DayFlowEntity) bool {
 	}
 
 	util.OpenConnection("dayFlow")
-	return util.UpdateOne(filter, updateEntity)
+	return util.UpdateMany(filter, updateEntity) == 1
+}
+
+func DeleteDayFlowByObjectId(objectId primitive.ObjectID) DayFlowEntity {
+
+	filter := bson.D{
+		primitive.E{Key: "_id", Value: objectId},
+	}
+
+	entity := GetDayFlowByObjectId(objectId)
+	if entity.IsEmpty() {
+		log.Fatal("DayFlow does not exist!")
+	} else {
+		util.OpenConnection("dayFlow")
+		util.DeleteMany(filter)
+		return entity
+	}
+	return DayFlowEntity{}
+}
+
+func DeleteDayFlowByDate(date time.Time) DayFlowEntity {
+
+	monthInInt, _ := strconv.Atoi(date.Format("01"))
+	filter := bson.D{
+		primitive.E{Key: "day", Value: date.Day()},
+		primitive.E{Key: "month", Value: monthInInt},
+		primitive.E{Key: "year", Value: date.Year()},
+	}
+
+	entity := GetDayFlowByDate(date)
+	if entity.IsEmpty() {
+		log.Fatal("DayFlow does not exist!")
+	} else {
+		util.OpenConnection("dayFlow")
+		util.DeleteMany(filter)
+		return entity
+	}
+	return DayFlowEntity{}
 }
 
 func convertDayFlowEntity2BsonD(entity DayFlowEntity) bson.D {
