@@ -31,7 +31,7 @@ func GetDayFlowByObjectId(objectId primitive.ObjectID) DayFlowEntity {
 
 	// 打开dayFlow的数据表连线
 	util.OpenConnection("dayFlow")
-	return convertBsonM2DayFlowEntity(util.QueryOne(filter))
+	return convertBsonM2DayFlowEntity(util.GetOne(filter))
 }
 
 func GetDayFlowByDate(date time.Time) DayFlowEntity {
@@ -47,7 +47,7 @@ func GetDayFlowByDate(date time.Time) DayFlowEntity {
 	}
 
 	util.OpenConnection("dayFlow")
-	return convertBsonM2DayFlowEntity(util.QueryOne(filter))
+	return convertBsonM2DayFlowEntity(util.GetOne(filter))
 }
 
 func InsertDayFlowByEntity(entity DayFlowEntity) primitive.ObjectID {

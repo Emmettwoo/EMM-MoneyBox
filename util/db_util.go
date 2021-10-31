@@ -30,9 +30,6 @@ func OpenConnection(collectionName string) {
 	// 檢查數據庫配置
 	if DEFAULT_DATABASE_URI == "" {
 		log.Fatal("Environment Value 'MONGO_DB_URI' not set.")
-	} else {
-		// log.Output(0, "Connection established.")
-		// log.Print("Using MONGO_DB_URI: " + DEFAULT_DATABASE_URI)
 	}
 
 	// 定義數據庫連綫
@@ -62,7 +59,7 @@ func checkConnection() {
 	}
 }
 
-func QueryOne(filter bson.D) bson.M {
+func GetOne(filter bson.D) bson.M {
 
 	checkConnection()
 
@@ -79,7 +76,7 @@ func QueryOne(filter bson.D) bson.M {
 	return resultInBson
 }
 
-func QueryMany(filter bson.D) []bson.M {
+func GetMany(filter bson.D) []bson.M {
 
 	checkConnection()
 

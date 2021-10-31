@@ -25,7 +25,7 @@ func GetCashFlowByObjectId(objectId primitive.ObjectID) CashFlowEntity {
 	// 打开cashFlow的数据表连线
 	util.OpenConnection("cashFlow")
 
-	return convertBsonM2CashFlowEntity(util.QueryOne(filter))
+	return convertBsonM2CashFlowEntity(util.GetOne(filter))
 }
 
 func GetCashFlowsByObjectIdArray(objectIdArray []primitive.ObjectID) []CashFlowEntity {
@@ -41,7 +41,7 @@ func GetCashFlowsByObjectIdArray(objectIdArray []primitive.ObjectID) []CashFlowE
 	util.OpenConnection("cashFlow")
 
 	// 获取查询结果并转入结构对象
-	queryResultArray := util.QueryMany(filter)
+	queryResultArray := util.GetMany(filter)
 	for _, queryResult := range queryResultArray {
 		entityArray = append(entityArray, convertBsonM2CashFlowEntity(queryResult))
 	}
