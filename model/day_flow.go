@@ -1,7 +1,6 @@
 package model
 
 import (
-	"log"
 	"reflect"
 	"strconv"
 	"time"
@@ -70,16 +69,16 @@ func InsertDayFlowByDate(date time.Time) primitive.ObjectID {
 
 func UpdateDayFlowByEntity(entity DayFlowEntity) bool {
 
+	if entity.Id == primitive.NilObjectID {
+		panic("DayFlow's id can not be nil.")
+	}
+
 	filter := bson.D{
 		primitive.E{Key: "_id", Value: entity.Id},
 	}
 
-	updateEntity := bson.D{
-		primitive.E{Key: "$set", Value: convertDayFlowEntity2BsonD(entity)},
-	}
-
 	util.OpenConnection("dayFlow")
-	return util.UpdateMany(filter, updateEntity) == 1
+	return util.UpdateMany(filter, convertDayFlowEntity2BsonD(entity)) == 1
 }
 
 func DeleteDayFlowByObjectId(objectId primitive.ObjectID) DayFlowEntity {
@@ -90,13 +89,12 @@ func DeleteDayFlowByObjectId(objectId primitive.ObjectID) DayFlowEntity {
 
 	entity := GetDayFlowByObjectId(objectId)
 	if entity.IsEmpty() {
-		log.Fatal("DayFlow does not exist!")
+		panic("DayFlow does not exist!")
 	} else {
 		util.OpenConnection("dayFlow")
 		util.DeleteMany(filter)
 		return entity
 	}
-	return DayFlowEntity{}
 }
 
 func DeleteDayFlowByDate(date time.Time) DayFlowEntity {
@@ -110,13 +108,12 @@ func DeleteDayFlowByDate(date time.Time) DayFlowEntity {
 
 	entity := GetDayFlowByDate(date)
 	if entity.IsEmpty() {
-		log.Fatal("DayFlow does not exist!")
+		panic("DayFlow does not exist!")
 	} else {
 		util.OpenConnection("dayFlow")
 		util.DeleteMany(filter)
 		return entity
 	}
-	return DayFlowEntity{}
 }
 
 func convertDayFlowEntity2BsonD(entity DayFlowEntity) bson.D {

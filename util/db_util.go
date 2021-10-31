@@ -119,8 +119,12 @@ func UpdateOne(filter bson.D, data bson.D) bool {
 
 	checkConnection()
 
+	updateData := bson.D{
+		primitive.E{Key: "$set", Value: data},
+	}
+
 	// If the filter matches multiple documents, one will be selected from the matched set and MatchedCount will equal 1.
-	result, err := collection.UpdateOne(context.TODO(), filter, data)
+	result, err := collection.UpdateOne(context.TODO(), filter, updateData)
 	if err != nil {
 		panic(err)
 	}
@@ -132,8 +136,11 @@ func UpdateMany(filter bson.D, data bson.D) int64 {
 
 	checkConnection()
 
+	updateData := bson.D{
+		primitive.E{Key: "$set", Value: data},
+	}
 	// Upsert disable by default.
-	result, err := collection.UpdateMany(context.TODO(), filter, data)
+	result, err := collection.UpdateMany(context.TODO(), filter, updateData)
 	if err != nil {
 		panic(err)
 	}

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"reflect"
 	"time"
 
 	"github.com/emmettwoo/EMM-MoneyBox/util"
@@ -14,6 +15,10 @@ type CashFlowEntity struct {
 	Category string             `json:"category" bson:"category"`
 	Desc     string             `json:"desc" bson:"desc"`
 	Remark   string             `json:"remark" bson:"remark"`
+}
+
+func (entity CashFlowEntity) IsEmpty() bool {
+	return reflect.DeepEqual(entity, DayFlowEntity{})
 }
 
 func GetCashFlowByObjectId(objectId primitive.ObjectID) CashFlowEntity {
@@ -65,6 +70,36 @@ func InsertCashFlowByEntity(entity CashFlowEntity) primitive.ObjectID {
 	UpdateDayFlowByEntity(dayFlowEntity)
 
 	return newCashFlowId
+}
+
+func UpdateCashFlowByEntity(entity CashFlowEntity) bool {
+
+	if entity.Id == primitive.NilObjectID {
+		panic("CashFlow's id can not be nil.")
+	}
+
+	filter := bson.D{
+		primitive.E{Key: "_id", Value: entity.Id},
+	}
+
+	util.OpenConnection("cashFlow")
+	return util.UpdateMany(filter, convertCashFlowEntity2BsonD(entity)) == 1
+}
+
+func DeleteCashFlowByObjectId(objectId primitive.ObjectID) CashFlowEntity {
+
+	filter := bson.D{
+		primitive.E{Key: "_id", Value: objectId},
+	}
+
+	entity := GetCashFlowByObjectId(objectId)
+	if entity.IsEmpty() {
+		panic("CashFlow does not exist!")
+	} else {
+		util.OpenConnection("cashFlow")
+		util.DeleteMany(filter)
+		return entity
+	}
 }
 
 func convertCashFlowEntity2BsonD(entity CashFlowEntity) bson.D {
