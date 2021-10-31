@@ -2,11 +2,11 @@ package util
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -72,7 +72,7 @@ func QueryOne(filter bson.D) bson.M {
 
 	// 查詢失敗處理
 	if err == mongo.ErrNoDocuments {
-		fmt.Println("Record does not exist")
+		// fmt.Println("Record does not exist")
 	} else if err != nil {
 		log.Fatal(err)
 	}
@@ -90,7 +90,7 @@ func QueryMany(filter bson.D) []bson.M {
 
 	// 查詢失敗處理
 	if err == mongo.ErrNoDocuments {
-		fmt.Println("Records does not exist")
+		// fmt.Println("Records does not exist")
 	} else if err != nil {
 		log.Fatal(err)
 	}
@@ -100,4 +100,22 @@ func QueryMany(filter bson.D) []bson.M {
 	}
 
 	return resultInBsonArray
+}
+
+// 插入一條數據
+func InsertOne(data bson.D) primitive.ObjectID {
+
+	checkConnection()
+
+	/* result:
+	 *	type InsertOneResult struct {
+	 *		InsertedID primitive.ObjectID
+	 *	}
+	 */
+	result, err := collection.InsertOne(context.TODO(), data)
+	if err != nil {
+		panic(err)
+	}
+
+	return result.InsertedID.(primitive.ObjectID)
 }

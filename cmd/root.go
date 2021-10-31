@@ -16,12 +16,15 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// 尝试获取今日dayFlow
 		todayFlow := model.GetDayFlowByDate(time.Now())
-		fmt.Println("todayFlow: ", todayFlow)
-
-		// 用dayFlow换取cashFlow
-		cashFlowArray := model.GetCashFlowsByObjectIdArray(todayFlow.CashFlows)
-		for index, cashFlow := range cashFlowArray {
-			fmt.Println("cashFlow ", index, ": ", cashFlow)
+		if todayFlow.IsEmpty() {
+			fmt.Println("Today's flow is empty.")
+		} else {
+			fmt.Println("todayFlow: ", todayFlow)
+			// 用dayFlow换取cashFlow
+			cashFlowArray := model.GetCashFlowsByObjectIdArray(todayFlow.CashFlows)
+			for index, cashFlow := range cashFlowArray {
+				fmt.Println("cashFlow ", index, ": ", cashFlow)
+			}
 		}
 	},
 }
