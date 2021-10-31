@@ -119,3 +119,17 @@ func InsertOne(data bson.D) primitive.ObjectID {
 
 	return result.InsertedID.(primitive.ObjectID)
 }
+
+// 更新一條數據
+func UpdateOne(filter bson.D, data bson.D) bool {
+
+	checkConnection()
+
+	// Upsert disable by default.
+	result, err := collection.UpdateOne(context.TODO(), filter, data)
+	if err != nil {
+		panic(err)
+	}
+
+	return result.ModifiedCount == 1
+}

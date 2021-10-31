@@ -53,14 +53,14 @@ func InsertCashFlowByEntity(entity CashFlowEntity) primitive.ObjectID {
 
 	today := time.Now()
 
-	// TODO: 先判断有无dayFlow，无则创建，有则更新cashFlows
+	util.OpenConnection("cashFlow")
+	newCashFlowId := util.InsertOne(convertCashFlowEntity2BsonD(entity))
+
+	// 判断有无dayFlow，无则创建，然後更新cashFlows
 	dayFlowEntity := GetDayFlowByDate(today)
 	if dayFlowEntity.IsEmpty() {
 		dayFlowEntity = GetDayFlowByObjectId(InsertDayFlowByDate(today))
 	}
-
-	util.OpenConnection("cashFlow")
-	newCashFlowId := util.InsertOne(convertCashFlowEntity2BsonD(entity))
 	dayFlowEntity.CashFlows = append(dayFlowEntity.CashFlows, newCashFlowId)
 	UpdateDayFlowByEntity(dayFlowEntity)
 

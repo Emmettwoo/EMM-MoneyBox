@@ -40,9 +40,9 @@ func GetDayFlowByDate(date time.Time) DayFlowEntity {
 
 	// 查询条件为指定的年月日，设计上一天只会对应一笔dayFlow数据。
 	filter := bson.D{
-		primitive.E{Key: "year", Value: date.Year()},
-		primitive.E{Key: "month", Value: monthInInt},
 		primitive.E{Key: "day", Value: date.Day()},
+		primitive.E{Key: "month", Value: monthInInt},
+		primitive.E{Key: "year", Value: date.Year()},
 	}
 
 	util.OpenConnection("dayFlow")
@@ -50,13 +50,30 @@ func GetDayFlowByDate(date time.Time) DayFlowEntity {
 }
 
 func InsertDayFlowByDate(date time.Time) primitive.ObjectID {
-	// TODO: 暂未完成，插入空dayFlow
-	return primitive.NilObjectID
+
+	monthInInt, _ := strconv.Atoi(date.Format("01"))
+	entity := DayFlowEntity{
+		Day:   date.Day(),
+		Month: monthInInt,
+		Year:  date.Year(),
+	}
+
+	util.OpenConnection("dayFlow")
+	return util.InsertOne(convertDayFlowEntity2BsonD(entity))
 }
 
-func UpdateDayFlowByEntity(entity DayFlowEntity) primitive.ObjectID {
-	// TODO: 暂未完成，更新dayFlow
-	return primitive.NilObjectID
+func UpdateDayFlowByEntity(entity DayFlowEntity) bool {
+
+	filter := bson.D{
+		primitive.E{Key: "_id", Value: entity.Id},
+	}
+
+	updateEntity := bson.D{
+		primitive.E{Key: "$set", Value: convertDayFlowEntity2BsonD(entity)},
+	}
+
+	util.OpenConnection("dayFlow")
+	return util.UpdateOne(filter, updateEntity)
 }
 
 func convertDayFlowEntity2BsonD(entity DayFlowEntity) bson.D {
