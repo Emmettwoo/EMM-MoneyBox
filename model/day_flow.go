@@ -67,11 +67,11 @@ func convertDayFlowEntity2BsonD(entity DayFlowEntity) bson.D {
 	}
 
 	return bson.D{
-		{"_id", entity.Id},
-		{"cashFlows", entity.CashFlows},
-		{"day", entity.Day},
-		{"month", entity.Month},
-		{"year", entity.Year},
+		primitive.E{Key: "_id", Value: entity.Id},
+		primitive.E{Key: "cashFlows", Value: entity.CashFlows},
+		primitive.E{Key: "day", Value: entity.Day},
+		primitive.E{Key: "month", Value: entity.Month},
+		primitive.E{Key: "year", Value: entity.Year},
 	}
 }
 

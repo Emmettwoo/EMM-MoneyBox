@@ -75,11 +75,11 @@ func convertCashFlowEntity2BsonD(entity CashFlowEntity) bson.D {
 	}
 
 	return bson.D{
-		{"_id", entity.Id},
-		{"amount", entity.Amount},
-		{"category", entity.Category},
-		{"desc", entity.Desc},
-		{"remark", entity.Remark},
+		primitive.E{Key: "_id", Value: entity.Id},
+		primitive.E{Key: "amount", Value: entity.Amount},
+		primitive.E{Key: "category", Value: entity.Category},
+		primitive.E{Key: "desc", Value: entity.Desc},
+		primitive.E{Key: "remark", Value: entity.Remark},
 	}
 }
 
