@@ -28,6 +28,7 @@ Params:
 			return errors.New("must provide amount and category params")
 		}
 
+		// 必填參數1: 金額
 		amount, err := strconv.ParseFloat(args[0], 32)
 		if err != nil {
 			return err
@@ -35,23 +36,28 @@ Params:
 		// 取小數點後兩位
 		amount, _ = decimal.NewFromFloat(amount).Round(2).Float64()
 
+		// 必填參數2: 類別
+		// todo(emmett): 可以維護一個 category 列表，僅允許設定好的類別變數
 		category := args[1]
-		desc := "null"
+
+		// 選填參數3: 日期（默認當天）
+		date := time.Time{}
 		if len(args) >= 3 {
-			desc = args[2]
+			var dateLayoutFormat = "20060102"
+			date, _ = time.Parse(dateLayoutFormat, args[2])
 		}
 
-		date := time.Time{}
+		// 選填參數4: 描述（默認爲空）
+		desc := ""
 		if len(args) >= 4 {
-			var dateLayoutFormat = "20060102"
-			date, _ = time.Parse(dateLayoutFormat, args[3])
+			desc = args[3]
 		}
 
 		newCashFlowId := model.InsertCashFlowByEntity(model.CashFlowEntity{
 			Amount:   amount,
 			Category: category,
 			Desc:     desc,
-			Remark:   "null",
+			Remark:   "",
 		}, date)
 
 		fmt.Println(model.GetCashFlowByObjectId(newCashFlowId))
