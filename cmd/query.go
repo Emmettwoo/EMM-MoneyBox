@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/emmettwoo/EMM-MoneyBox/model"
+	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/spf13/cobra"
 )
 
@@ -29,8 +30,7 @@ Types:
 
 			var queryDate = time.Now()
 			if len(args) > 1 {
-				var dateLayoutFormat = "20060102"
-				queryDate, _ = time.Parse(dateLayoutFormat, args[1])
+				queryDate = util.FormatDateFromString(args[1])
 			}
 
 			// date format is yyyymmdd
