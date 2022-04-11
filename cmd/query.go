@@ -8,6 +8,7 @@ import (
 	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/spf13/cobra"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var queryCmd = &cobra.Command{
@@ -17,7 +18,8 @@ var queryCmd = &cobra.Command{
 Query for CashFlow data.
 
 Types:
-  date  ->  query by date, pass confition with format 19700101.`,
+  date  ->  query by date, pass condition with format 19700101.
+  id    ->  query by id, pass condition like 6241a836c72c65d9f343d891.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		if len(args) <= 0 {
@@ -26,8 +28,21 @@ Types:
 
 		var queryType = args[0]
 		switch queryType {
-		case "date":
+		case "id":
 
+			if len(args) < 2 {
+				return errors.New("must give a id string")
+			}
+
+			objectId, err := primitive.ObjectIDFromHex(args[1])
+			if err != nil {
+				panic(err)
+			}
+
+			cashFlow := model.GetCashFlowByObjectId(objectId)
+			fmt.Println("cashFlow ", 0, ": ", cashFlow)
+
+		case "date":
 			var queryDate = time.Now()
 			if len(args) > 1 {
 				queryDate = util.FormatDateFromString(args[1])
