@@ -25,7 +25,7 @@ func init() {
 }
 
 // 開啓數據庫連綫
-func OpenConnection(collectionName string) {
+func OpenMongoDbConnection(collectionName string) {
 
 	// 檢查數據庫配置
 	if DEFAULT_DATABASE_URI == "" {
@@ -44,7 +44,7 @@ func OpenConnection(collectionName string) {
 }
 
 // 關閉數據庫連綫 FIXME: 存在空指針問題
-func CloseConnection() {
+func CloseMongoDbConnection() {
 	if err := client.Disconnect(context.TODO()); err != nil {
 		panic(err)
 	}
@@ -53,15 +53,15 @@ func CloseConnection() {
 }
 
 // 檢查數據庫連綫
-func checkConnection() {
+func checkMongoDbConnection() {
 	if !isConnected {
 		log.Fatal("Empty Database Connection.")
 	}
 }
 
-func GetOne(filter bson.D) bson.M {
+func GetOneInMongoDb(filter bson.D) bson.M {
 
-	checkConnection()
+	checkMongoDbConnection()
 
 	var resultInBson bson.M
 	err := collection.FindOne(context.TODO(), filter).Decode(&resultInBson)
@@ -76,9 +76,9 @@ func GetOne(filter bson.D) bson.M {
 	return resultInBson
 }
 
-func GetMany(filter bson.D) []bson.M {
+func GetManyInMongoDb(filter bson.D) []bson.M {
 
-	checkConnection()
+	checkMongoDbConnection()
 
 	var resultInBsonArray []bson.M
 	cursor, err := collection.Find(context.TODO(), filter)
@@ -97,9 +97,9 @@ func GetMany(filter bson.D) []bson.M {
 	return resultInBsonArray
 }
 
-func InsertOne(data bson.D) primitive.ObjectID {
+func InsertOneInMongoDb(data bson.D) primitive.ObjectID {
 
-	checkConnection()
+	checkMongoDbConnection()
 
 	/* result:
 	 *	type InsertOneResult struct {
@@ -115,9 +115,9 @@ func InsertOne(data bson.D) primitive.ObjectID {
 }
 
 // Deprecated: use UpdateMany() instead.
-func UpdateOne(filter bson.D, data bson.D) bool {
+func UpdateOneInMongoDb(filter bson.D, data bson.D) bool {
 
-	checkConnection()
+	checkMongoDbConnection()
 
 	updateData := bson.D{
 		primitive.E{Key: "$set", Value: data},
@@ -132,9 +132,9 @@ func UpdateOne(filter bson.D, data bson.D) bool {
 	return result.ModifiedCount == 1
 }
 
-func UpdateMany(filter bson.D, data bson.D) int64 {
+func UpdateManyInMongoDb(filter bson.D, data bson.D) int64 {
 
-	checkConnection()
+	checkMongoDbConnection()
 
 	updateData := bson.D{
 		primitive.E{Key: "$set", Value: data},
@@ -149,9 +149,9 @@ func UpdateMany(filter bson.D, data bson.D) int64 {
 }
 
 // Deprecated: use DeleteMany() instead.
-func DeleteOne(filter bson.D) bool {
+func DeleteOneInMongoDb(filter bson.D) bool {
 
-	checkConnection()
+	checkMongoDbConnection()
 
 	// If the filter matches multiple documents, one will be selected from the matched set.
 	result, err := collection.DeleteOne(context.TODO(), filter)
@@ -162,9 +162,9 @@ func DeleteOne(filter bson.D) bool {
 	return result.DeletedCount == 1
 }
 
-func DeleteMany(filter bson.D) int64 {
+func DeleteManyInMongoDb(filter bson.D) int64 {
 
-	checkConnection()
+	checkMongoDbConnection()
 
 	result, err := collection.DeleteOne(context.TODO(), filter)
 	if err != nil {

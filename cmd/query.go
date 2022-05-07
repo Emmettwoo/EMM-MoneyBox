@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/emmettwoo/EMM-MoneyBox/model"
+	"github.com/emmettwoo/EMM-MoneyBox/mapper/mongodb"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -39,7 +39,7 @@ Types:
 				panic(err)
 			}
 
-			cashFlow := model.GetCashFlowByObjectId(objectId)
+			cashFlow := mongodb.GetCashFlowByObjectId(objectId)
 			fmt.Println("cashFlow ", 0, ": ", cashFlow)
 
 		case "date":
@@ -49,11 +49,11 @@ Types:
 			}
 
 			// date format is yyyymmdd
-			dayFlow := model.GetDayFlowByDate(queryDate)
+			dayFlow := mongodb.GetDayFlowByDate(queryDate)
 			if dayFlow.IsEmpty() {
 				fmt.Println("The day's flow is empty.")
 			} else {
-				cashFlowArray := model.GetCashFlowsByObjectIdArray(dayFlow.CashFlows)
+				cashFlowArray := mongodb.GetCashFlowsByObjectIdArray(dayFlow.CashFlows)
 				for index, cashFlow := range cashFlowArray {
 					fmt.Println("cashFlow ", index, ": ", cashFlow)
 				}

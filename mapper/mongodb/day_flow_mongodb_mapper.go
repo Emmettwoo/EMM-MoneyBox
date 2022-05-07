@@ -1,39 +1,27 @@
-package model
+package mongodb
 
 import (
-	"reflect"
 	"strconv"
 	"time"
 
+	"github.com/emmettwoo/EMM-MoneyBox/entity"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type DayFlowEntity struct {
-	Id        primitive.ObjectID   `bson:"_id,omitempty"`
-	CashFlows []primitive.ObjectID `json:"cashFlows" bson:"cashFlows"`
-	Day       int                  `json:"day" bson:"day"`
-	Month     int                  `json:"month" bson:"month"`
-	Year      int                  `json:"year" bson:"year"`
-}
-
-func (entity DayFlowEntity) IsEmpty() bool {
-	return reflect.DeepEqual(entity, DayFlowEntity{})
-}
-
-func GetDayFlowByObjectId(objectId primitive.ObjectID) DayFlowEntity {
+func GetDayFlowByObjectId(objectId primitive.ObjectID) entity.DayFlowEntity {
 
 	filter := bson.D{
 		primitive.E{Key: "_id", Value: objectId},
 	}
 
 	// 打开dayFlow的数据表连线
-	util.OpenConnection("dayFlow")
-	return convertBsonM2DayFlowEntity(util.GetOne(filter))
+	util.OpenMongoDbConnection("dayFlow")
+	return convertBsonM2DayFlowEntity(util.GetOneInMongoDb(filter))
 }
 
-func GetDayFlowByDate(date time.Time) DayFlowEntity {
+func GetDayFlowByDate(date time.Time) entity.DayFlowEntity {
 
 	// Golang有趣的日期转换机制，不过转出来是String，数据库是int，所以转一下类型。
 	monthInInt, _ := strconv.Atoi(date.Format("01"))
@@ -45,29 +33,29 @@ func GetDayFlowByDate(date time.Time) DayFlowEntity {
 		primitive.E{Key: "year", Value: date.Year()},
 	}
 
-	util.OpenConnection("dayFlow")
-	return convertBsonM2DayFlowEntity(util.GetOne(filter))
+	util.OpenMongoDbConnection("dayFlow")
+	return convertBsonM2DayFlowEntity(util.GetOneInMongoDb(filter))
 }
 
-func InsertDayFlowByEntity(entity DayFlowEntity) primitive.ObjectID {
-	util.OpenConnection("dayFlow")
-	return util.InsertOne(convertDayFlowEntity2BsonD(entity))
+func InsertDayFlowByEntity(entity entity.DayFlowEntity) primitive.ObjectID {
+	util.OpenMongoDbConnection("dayFlow")
+	return util.InsertOneInMongoDb(convertDayFlowEntity2BsonD(entity))
 }
 
 func InsertDayFlowByDate(date time.Time) primitive.ObjectID {
 
 	monthInInt, _ := strconv.Atoi(date.Format("01"))
-	entity := DayFlowEntity{
+	entity := entity.DayFlowEntity{
 		Day:   date.Day(),
 		Month: monthInInt,
 		Year:  date.Year(),
 	}
 
-	util.OpenConnection("dayFlow")
-	return util.InsertOne(convertDayFlowEntity2BsonD(entity))
+	util.OpenMongoDbConnection("dayFlow")
+	return util.InsertOneInMongoDb(convertDayFlowEntity2BsonD(entity))
 }
 
-func UpdateDayFlowByEntity(entity DayFlowEntity) bool {
+func UpdateDayFlowByEntity(entity entity.DayFlowEntity) bool {
 
 	if entity.Id == primitive.NilObjectID {
 		panic("DayFlow's id can not be nil.")
@@ -77,11 +65,11 @@ func UpdateDayFlowByEntity(entity DayFlowEntity) bool {
 		primitive.E{Key: "_id", Value: entity.Id},
 	}
 
-	util.OpenConnection("dayFlow")
-	return util.UpdateMany(filter, convertDayFlowEntity2BsonD(entity)) == 1
+	util.OpenMongoDbConnection("dayFlow")
+	return util.UpdateManyInMongoDb(filter, convertDayFlowEntity2BsonD(entity)) == 1
 }
 
-func DeleteDayFlowByObjectId(objectId primitive.ObjectID) DayFlowEntity {
+func DeleteDayFlowByObjectId(objectId primitive.ObjectID) entity.DayFlowEntity {
 
 	filter := bson.D{
 		primitive.E{Key: "_id", Value: objectId},
@@ -91,13 +79,13 @@ func DeleteDayFlowByObjectId(objectId primitive.ObjectID) DayFlowEntity {
 	if entity.IsEmpty() {
 		panic("DayFlow does not exist!")
 	} else {
-		util.OpenConnection("dayFlow")
-		util.DeleteMany(filter)
+		util.OpenMongoDbConnection("dayFlow")
+		util.DeleteManyInMongoDb(filter)
 		return entity
 	}
 }
 
-func DeleteDayFlowByDate(date time.Time) DayFlowEntity {
+func DeleteDayFlowByDate(date time.Time) entity.DayFlowEntity {
 
 	monthInInt, _ := strconv.Atoi(date.Format("01"))
 	filter := bson.D{
@@ -110,13 +98,13 @@ func DeleteDayFlowByDate(date time.Time) DayFlowEntity {
 	if entity.IsEmpty() {
 		panic("DayFlow does not exist!")
 	} else {
-		util.OpenConnection("dayFlow")
-		util.DeleteMany(filter)
+		util.OpenMongoDbConnection("dayFlow")
+		util.DeleteManyInMongoDb(filter)
 		return entity
 	}
 }
 
-func convertDayFlowEntity2BsonD(entity DayFlowEntity) bson.D {
+func convertDayFlowEntity2BsonD(entity entity.DayFlowEntity) bson.D {
 
 	// 为空时自动生成新Id
 	if entity.Id == primitive.NilObjectID {
@@ -132,8 +120,8 @@ func convertDayFlowEntity2BsonD(entity DayFlowEntity) bson.D {
 	}
 }
 
-func convertBsonM2DayFlowEntity(bsonM bson.M) DayFlowEntity {
-	var entity DayFlowEntity
+func convertBsonM2DayFlowEntity(bsonM bson.M) entity.DayFlowEntity {
+	var entity entity.DayFlowEntity
 	bsonBytes, _ := bson.Marshal(bsonM)
 	bson.Unmarshal(bsonBytes, &entity)
 	return entity
