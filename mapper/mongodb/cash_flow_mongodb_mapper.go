@@ -9,7 +9,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func GetCashFlowByObjectId(objectId primitive.ObjectID) entity.CashFlowEntity {
+type CashFlowMongoDbMapper struct{}
+
+var cashFlowMongoDbMapper CashFlowMongoDbMapper
+
+func (CashFlowMongoDbMapper) GetCashFlowByObjectId(objectId primitive.ObjectID) entity.CashFlowEntity {
 
 	filter := bson.D{
 		primitive.E{Key: "_id", Value: objectId},
@@ -21,7 +25,7 @@ func GetCashFlowByObjectId(objectId primitive.ObjectID) entity.CashFlowEntity {
 	return convertBsonM2CashFlowEntity(util.GetOneInMongoDb(filter))
 }
 
-func GetCashFlowsByObjectIdArray(objectIdArray []primitive.ObjectID) []entity.CashFlowEntity {
+func (CashFlowMongoDbMapper) GetCashFlowsByObjectIdArray(objectIdArray []primitive.ObjectID) []entity.CashFlowEntity {
 
 	var entityArray []entity.CashFlowEntity
 
@@ -42,7 +46,7 @@ func GetCashFlowsByObjectIdArray(objectIdArray []primitive.ObjectID) []entity.Ca
 	return entityArray
 }
 
-func InsertCashFlowByEntity(entity entity.CashFlowEntity, date time.Time) primitive.ObjectID {
+func (CashFlowMongoDbMapper) InsertCashFlowByEntity(entity entity.CashFlowEntity, date time.Time) primitive.ObjectID {
 
 	targetDay := date
 	if (targetDay == time.Time{}) {
@@ -53,17 +57,18 @@ func InsertCashFlowByEntity(entity entity.CashFlowEntity, date time.Time) primit
 	newCashFlowId := util.InsertOneInMongoDb(convertCashFlowEntity2BsonD(entity))
 
 	// 判断有无dayFlow，无则创建，然後更新cashFlows
-	dayFlowEntity := GetDayFlowByDate(targetDay)
+	dayFlowEntity := dayFlowMongoDbMapper.GetDayFlowByDate(targetDay)
 	if dayFlowEntity.IsEmpty() {
-		dayFlowEntity = GetDayFlowByObjectId(InsertDayFlowByDate(targetDay))
+		dayFlowEntity = dayFlowMongoDbMapper.GetDayFlowByObjectId(
+			dayFlowMongoDbMapper.InsertDayFlowByDate(targetDay))
 	}
 	dayFlowEntity.CashFlows = append(dayFlowEntity.CashFlows, newCashFlowId)
-	UpdateDayFlowByEntity(dayFlowEntity)
+	dayFlowMongoDbMapper.UpdateDayFlowByEntity(dayFlowEntity)
 
 	return newCashFlowId
 }
 
-func UpdateCashFlowByEntity(entity entity.CashFlowEntity) bool {
+func (CashFlowMongoDbMapper) UpdateCashFlowByEntity(entity entity.CashFlowEntity) bool {
 
 	if entity.Id == primitive.NilObjectID {
 		panic("CashFlow's id can not be nil.")
@@ -77,13 +82,13 @@ func UpdateCashFlowByEntity(entity entity.CashFlowEntity) bool {
 	return util.UpdateManyInMongoDb(filter, convertCashFlowEntity2BsonD(entity)) == 1
 }
 
-func DeleteCashFlowByObjectId(objectId primitive.ObjectID) entity.CashFlowEntity {
+func (CashFlowMongoDbMapper) DeleteCashFlowByObjectId(objectId primitive.ObjectID) entity.CashFlowEntity {
 
 	filter := bson.D{
 		primitive.E{Key: "_id", Value: objectId},
 	}
 
-	entity := GetCashFlowByObjectId(objectId)
+	entity := cashFlowMongoDbMapper.GetCashFlowByObjectId(objectId)
 	if entity.IsEmpty() {
 		panic("CashFlow does not exist!")
 	} else {

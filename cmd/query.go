@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/emmettwoo/EMM-MoneyBox/mapper/mongodb"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -39,7 +38,7 @@ Types:
 				panic(err)
 			}
 
-			cashFlow := mongodb.GetCashFlowByObjectId(objectId)
+			cashFlow := cashFlowMapper.GetCashFlowByObjectId(objectId)
 			fmt.Println("cashFlow ", 0, ": ", cashFlow)
 
 		case "date":
@@ -49,11 +48,12 @@ Types:
 			}
 
 			// date format is yyyymmdd
-			dayFlow := mongodb.GetDayFlowByDate(queryDate)
+			dayFlow := dayFlowMapper.GetDayFlowByDate(queryDate)
+			// TODO: 還有一種情況是 dayFlow建立了，沒有cashFlow。
 			if dayFlow.IsEmpty() {
 				fmt.Println("The day's flow is empty.")
 			} else {
-				cashFlowArray := mongodb.GetCashFlowsByObjectIdArray(dayFlow.CashFlows)
+				cashFlowArray := cashFlowMapper.GetCashFlowsByObjectIdArray(dayFlow.CashFlows)
 				for index, cashFlow := range cashFlowArray {
 					fmt.Println("cashFlow ", index, ": ", cashFlow)
 				}

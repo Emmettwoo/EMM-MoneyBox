@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/emmettwoo/EMM-MoneyBox/mapper/mongodb"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/spf13/cobra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -43,7 +42,7 @@ Types:
 					panic(err)
 				}
 
-				cashFlow := mongodb.DeleteCashFlowByObjectId(objectId)
+				cashFlow := cashFlowMapper.DeleteCashFlowByObjectId(objectId)
 				fmt.Println("cashFlow ", currentDelete, ": ", cashFlow)
 				currentDelete++
 			}
@@ -56,11 +55,11 @@ Types:
 			}
 
 			// date format is yyyymmdd
-			dayFlow := mongodb.DeleteDayFlowByDate(deleteDate)
+			dayFlow := dayFlowMapper.DeleteDayFlowByDate(deleteDate)
 			if dayFlow.IsEmpty() {
 				fmt.Println("The day's flow is empty.")
 			} else {
-				cashFlowArray := mongodb.GetCashFlowsByObjectIdArray(dayFlow.CashFlows)
+				cashFlowArray := cashFlowMapper.GetCashFlowsByObjectIdArray(dayFlow.CashFlows)
 				for index, cashFlow := range cashFlowArray {
 					fmt.Println("cashFlow ", index-1, ": ", cashFlow)
 				}

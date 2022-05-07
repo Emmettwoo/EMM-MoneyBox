@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/emmettwoo/EMM-MoneyBox/entity"
-	"github.com/emmettwoo/EMM-MoneyBox/mapper/mongodb"
 	"github.com/shopspring/decimal"
 	"github.com/spf13/cobra"
 )
@@ -54,14 +53,14 @@ Params:
 			desc = args[3]
 		}
 
-		newCashFlowId := mongodb.InsertCashFlowByEntity(entity.CashFlowEntity{
+		newCashFlowId := cashFlowMapper.InsertCashFlowByEntity(entity.CashFlowEntity{
 			Amount:   amount,
 			Category: category,
 			Desc:     desc,
 			Remark:   "",
 		}, date)
 
-		fmt.Println(mongodb.GetCashFlowByObjectId(newCashFlowId))
+		fmt.Println(cashFlowMapper.GetCashFlowByObjectId(newCashFlowId))
 		return nil
 	},
 }

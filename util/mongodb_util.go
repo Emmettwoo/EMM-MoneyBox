@@ -3,7 +3,6 @@ package util
 import (
 	"context"
 	"log"
-	"os"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -20,8 +19,8 @@ var isConnected bool = false
 
 // 初始化數據庫參數
 func init() {
-	DEFAULT_DATABASE_URI = os.Getenv("MONGO_DB_URI")
-	DEFAULT_DATABASE_NAME = "emm-money-box"
+	DEFAULT_DATABASE_URI = GetConfigByKey("db.url")
+	DEFAULT_DATABASE_NAME = GetConfigByKey("db.name")
 }
 
 // 開啓數據庫連綫
