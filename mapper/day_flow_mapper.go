@@ -5,6 +5,7 @@ import (
 
 	"github.com/emmettwoo/EMM-MoneyBox/entity"
 	"github.com/emmettwoo/EMM-MoneyBox/mapper/mongodb"
+	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -18,8 +19,14 @@ type DayFlowMapper interface {
 }
 
 func GetDayFlowMapper() DayFlowMapper {
-
-	var dayFlowMongoDbMapper DayFlowMapper
-	dayFlowMongoDbMapper = mongodb.DayFlowMongoDbMapper{}
-	return dayFlowMongoDbMapper
+	switch util.GetConfigByKey("db.type") {
+	case "mongodb":
+		var dayFlowMongoDbMapper DayFlowMapper
+		dayFlowMongoDbMapper = mongodb.DayFlowMongoDbMapper{}
+		return dayFlowMongoDbMapper
+	case "mysql":
+		panic("mysql support is still under dev")
+	default:
+		panic("database type not supported")
+	}
 }
