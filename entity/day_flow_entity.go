@@ -15,5 +15,8 @@ type DayFlowEntity struct {
 }
 
 func (entity DayFlowEntity) IsEmpty() bool {
-	return reflect.DeepEqual(entity, DayFlowEntity{})
+	if reflect.DeepEqual(entity, DayFlowEntity{}) {
+		return true
+	}
+	return len(entity.CashFlows) == 0
 }

@@ -12,6 +12,8 @@ import (
 type CashFlowMapper interface {
 	GetCashFlowByObjectId(objectId primitive.ObjectID) entity.CashFlowEntity
 	GetCashFlowsByObjectIdArray(objectIdArray []primitive.ObjectID) []entity.CashFlowEntity
+	GetCashFlowsByExactDesc(desc string) []entity.CashFlowEntity
+	GetCashFlowsByFuzzyDesc(desc string) []entity.CashFlowEntity
 	InsertCashFlowByEntity(entity entity.CashFlowEntity, date time.Time) primitive.ObjectID
 	UpdateCashFlowByEntity(entity entity.CashFlowEntity) bool
 	DeleteCashFlowByObjectId(objectId primitive.ObjectID) entity.CashFlowEntity

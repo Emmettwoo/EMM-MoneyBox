@@ -46,6 +46,50 @@ func (CashFlowMongoDbMapper) GetCashFlowsByObjectIdArray(objectIdArray []primiti
 	return entityArray
 }
 
+func (CashFlowMongoDbMapper) GetCashFlowsByExactDesc(desc string) []entity.CashFlowEntity {
+
+	var entityArray []entity.CashFlowEntity
+
+	filter := bson.D{
+		primitive.E{Key: "desc", Value: desc},
+	}
+
+	// 打开cashFlow的数据表连线
+	util.OpenMongoDbConnection("cashFlow")
+
+	// 获取查询结果并转入结构对象
+	queryResultArray := util.GetManyInMongoDb(filter)
+	for _, queryResult := range queryResultArray {
+		entityArray = append(entityArray, convertBsonM2CashFlowEntity(queryResult))
+	}
+
+	return entityArray
+}
+
+func (CashFlowMongoDbMapper) GetCashFlowsByFuzzyDesc(desc string) []entity.CashFlowEntity {
+
+	var entityArray []entity.CashFlowEntity
+
+	// Options i for disable case sensitive.
+	filter := bson.D{
+		primitive.E{Key: "desc", Value: primitive.Regex{
+			Pattern: desc,
+			Options: "i",
+		}},
+	}
+
+	// 打开cashFlow的数据表连线
+	util.OpenMongoDbConnection("cashFlow")
+
+	// 获取查询结果并转入结构对象
+	queryResultArray := util.GetManyInMongoDb(filter)
+	for _, queryResult := range queryResultArray {
+		entityArray = append(entityArray, convertBsonM2CashFlowEntity(queryResult))
+	}
+
+	return entityArray
+}
+
 func (CashFlowMongoDbMapper) InsertCashFlowByEntity(entity entity.CashFlowEntity, date time.Time) primitive.ObjectID {
 
 	targetDay := date
