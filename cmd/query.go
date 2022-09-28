@@ -41,7 +41,7 @@ Types:
 			}
 
 			cashFlow := cashFlowMapper.GetCashFlowByObjectId(objectId)
-			fmt.Println("cashFlow ", 0, ": ", cashFlow)
+			fmt.Println("cashFlow ", 0, ": ", cashFlow.ToString())
 
 		case "date":
 			var queryDate = time.Now()
@@ -56,7 +56,7 @@ Types:
 			} else {
 				cashFlowArray := cashFlowMapper.GetCashFlowsByObjectIdArray(dayFlow.CashFlows)
 				for index, cashFlow := range cashFlowArray {
-					fmt.Println("cashFlow ", index, ": ", cashFlow)
+					fmt.Println("cashFlow ", index, ": ", cashFlow.ToString())
 				}
 			}
 
@@ -75,7 +75,7 @@ Types:
 			}
 
 			for index, cashFlow := range matchedCashFlow {
-				fmt.Println("cashFlow ", index, ": ", cashFlow)
+				fmt.Println("cashFlow ", index, ": ", cashFlow.ToString())
 			}
 
 		case "desc_fuzzy":
@@ -90,7 +90,7 @@ Types:
 			}
 
 			for index, cashFlow := range matchedCashFlow {
-				fmt.Println("cashFlow ", index, ": ", cashFlow)
+				fmt.Println("cashFlow ", index, ": ", cashFlow.ToString())
 			}
 
 		default:
