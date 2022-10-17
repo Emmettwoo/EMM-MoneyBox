@@ -114,7 +114,7 @@ func InsertOneInMongoDb(data bson.D) primitive.ObjectID {
 }
 
 // Deprecated: use UpdateMany() instead.
-func UpdateOneInMongoDb(filter bson.D, data bson.D) bool {
+func UpdateOneInMongoDb(filter, data bson.D) bool {
 
 	checkMongoDbConnection()
 
@@ -131,7 +131,7 @@ func UpdateOneInMongoDb(filter bson.D, data bson.D) bool {
 	return result.ModifiedCount == 1
 }
 
-func UpdateManyInMongoDb(filter bson.D, data bson.D) int64 {
+func UpdateManyInMongoDb(filter, data bson.D) int64 {
 
 	checkMongoDbConnection()
 

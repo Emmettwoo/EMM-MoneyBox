@@ -24,6 +24,6 @@ func GetConfigByKey(configKey string) string {
 	}
 }
 
-func SetConfigByKey(configKey string, configValue string) {
+func SetConfigByKey(configKey, configValue string) {
 	configurationMap[configKey] = configValue
 }
