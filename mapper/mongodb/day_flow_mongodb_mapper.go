@@ -79,6 +79,7 @@ func (DayFlowMongoDbMapper) DeleteDayFlowByObjectId(objectId primitive.ObjectID)
 		primitive.E{Key: "_id", Value: objectId},
 	}
 
+	//todo: 還需刪除 flow_ref, cash_flow --20221202
 	entity := dayFlowMongoDbMapper.GetDayFlowByObjectId(objectId)
 	if entity.IsEmpty() {
 		panic("DayFlow does not exist!")
@@ -98,6 +99,7 @@ func (DayFlowMongoDbMapper) DeleteDayFlowByDate(date time.Time) entity.DayFlowEn
 		primitive.E{Key: "year", Value: date.Year()},
 	}
 
+	//todo: 還需刪除 flow_ref, cash_flow --20221202
 	entity := dayFlowMongoDbMapper.GetDayFlowByDate(date)
 	if entity.IsEmpty() {
 		panic("DayFlow does not exist!")
