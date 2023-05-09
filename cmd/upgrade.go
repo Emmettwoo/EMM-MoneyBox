@@ -36,7 +36,7 @@ var upgradeCmd = &cobra.Command{
 					})
 				}
 				// 刪除原 day_flow 裏的關聯關係
-				dayFlow.CashFlows = []primitive.ObjectID
+				dayFlow.CashFlows = nil
 				dayFlowMapper.UpdateDayFlowByEntity(dayFlow)
 			}
 			queryDateNumber++

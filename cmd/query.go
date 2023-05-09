@@ -54,9 +54,10 @@ Types:
 			if dayFlow.IsEmpty() {
 				fmt.Println("The day's flow is empty.")
 			} else {
-				cashFlowArray := cashFlowMapper.GetCashFlowsByObjectIdArray(dayFlow.CashFlows)
-				for index, cashFlow := range cashFlowArray {
-					fmt.Println("cashFlow ", index, ": ", cashFlow.ToString())
+				flowRefArray := flowRefMapper.GetFlowRefByDayFlowId(dayFlow.Id)
+				for index, flowRef := range flowRefArray {
+					fmt.Println("cashFlow ", index, ": ", cashFlowMapper.GetCashFlowByObjectId(flowRef.CashFlowId).ToString(
+						util.FormatDateToStringWithSlash(dayFlow.Year, dayFlow.Month, dayFlow.Day)))
 				}
 			}
 

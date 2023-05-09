@@ -18,5 +18,6 @@ func (entity DayFlowEntity) IsEmpty() bool {
 	if reflect.DeepEqual(entity, DayFlowEntity{}) {
 		return true
 	}
+	// todo: 這裏判空的邏輯也會需要改掉
 	return len(entity.CashFlows) == 0
 }

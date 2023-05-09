@@ -19,3 +19,7 @@ func FormatDateFromString(dateString string) time.Time {
 func FormatDateToString(date time.Time) string {
 	return strconv.Itoa(date.Year()) + date.Format(DEFAULT_DATE_FORMAT_IN_STRING[4:5]) + strconv.Itoa(date.Day())
 }
+
+func FormatDateToStringWithSlash(year int, month int, day int) string {
+	return strconv.Itoa(year) + "/" + strconv.Itoa(month) + "/" + strconv.Itoa(day)
+}

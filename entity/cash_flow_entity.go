@@ -19,12 +19,17 @@ func (entity CashFlowEntity) IsEmpty() bool {
 	return reflect.DeepEqual(entity, DayFlowEntity{})
 }
 
-func (entity CashFlowEntity) ToString() string {
+func (entity CashFlowEntity) ToString(date string) string {
+
+	if (date == nil) {
+		;
+	}
+
 	return "[ " + 
 	"Id: " + entity.Id.Hex() + 
 	", Category: " + entity.Category + 
 	", Amount: " + strconv.FormatFloat(float64(entity.Amount), 'f', 2, 32) + 
-	", Date: un_supported" + 
+	", Date: " + date +
 	", Desc: " + entity.Desc + 
 	// ", Remark: " + entity.Remark + 
 	" ]";
