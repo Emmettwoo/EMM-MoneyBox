@@ -56,8 +56,7 @@ Types:
 			} else {
 				flowRefArray := flowRefMapper.GetFlowRefByDayFlowId(dayFlow.Id)
 				for index, flowRef := range flowRefArray {
-					fmt.Println("cashFlow ", index, ": ", cashFlowMapper.GetCashFlowByObjectId(flowRef.CashFlowId).ToString(
-						util.FormatDateToStringWithSlash(dayFlow.Year, dayFlow.Month, dayFlow.Day)))
+					fmt.Println("cashFlow ", index, ": ", cashFlowMapper.GetCashFlowByObjectId(flowRef.CashFlowId).ToString())
 				}
 			}
 
