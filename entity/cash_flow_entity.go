@@ -20,12 +20,12 @@ func (entity CashFlowEntity) IsEmpty() bool {
 }
 
 func (entity CashFlowEntity) ToString() string {
-	return "[ " + 
-	"Id: " + entity.Id.Hex() + 
-	", Category: " + entity.Category + 
-	", Amount: " + strconv.FormatFloat(float64(entity.Amount), 'f', 2, 32) + 
-	", Date: un_supported" + 
-	", Desc: " + entity.Desc + 
-	// ", Remark: " + entity.Remark + 
-	" ]";
+
+	return "[ " +
+		"Id: " + entity.Id.Hex() +
+		", Category: " + entity.Category +
+		", Amount: " + strconv.FormatFloat(float64(entity.Amount), 'f', 2, 32) +
+		", Desc: " + entity.Desc +
+		// ", Remark: " + entity.Remark +
+		" ]"
 }

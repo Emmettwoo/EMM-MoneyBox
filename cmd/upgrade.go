@@ -15,9 +15,9 @@ var upgradeCmd = &cobra.Command{
 	Long:  ` for test only. `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		var queryDateNumber = 20220927
+		var queryDateNumber = 20221120
 
-		for queryDateNumber < 20220928 {
+		for queryDateNumber < 20221130{
 			var queryDate = util.FormatDateFromString(strconv.Itoa(queryDateNumber))
 			dayFlow := dayFlowMapper.GetDayFlowByDate(queryDate)
 			if dayFlow.IsEmpty() {
@@ -29,12 +29,15 @@ var upgradeCmd = &cobra.Command{
 					fmt.Println("cashFlow", index, ": ", cashFlow.ToString())
 
 					// todo: 轉換前先調整查詢和插入的邏輯，與關聯信息建立聯係。
-					// 然後再按月份把目前已有的數據轉換出關聯信息
+					// 把目前已有的數據轉換出關聯信息
 					_ = flowRefMapper.InsertFlowRefByEntity(entity.FlowRefEntity{
 						DayFlowId:   dayFlow.Id,
 						CashFlowId: cashFlow.Id,
 					})
 				}
+				// 刪除原 day_flow 裏的關聯關係
+				dayFlow.CashFlows = nil
+				dayFlowMapper.UpdateDayFlowByEntity(dayFlow)
 			}
 			queryDateNumber++
 		}

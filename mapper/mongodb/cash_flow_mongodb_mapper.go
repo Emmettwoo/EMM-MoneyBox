@@ -100,6 +100,7 @@ func (CashFlowMongoDbMapper) InsertCashFlowByEntity(entity entity.CashFlowEntity
 	util.OpenMongoDbConnection("cashFlow")
 	newCashFlowId := util.InsertOneInMongoDb(convertCashFlowEntity2BsonD(entity))
 
+	//todo: 還需新增 flow_ref --20221202
 	// 判断有无dayFlow，无则创建，然後更新cashFlows
 	dayFlowEntity := dayFlowMongoDbMapper.GetDayFlowByDate(targetDay)
 	if dayFlowEntity.IsEmpty() {
@@ -132,6 +133,7 @@ func (CashFlowMongoDbMapper) DeleteCashFlowByObjectId(objectId primitive.ObjectI
 		primitive.E{Key: "_id", Value: objectId},
 	}
 
+	//todo: 還需刪除 flow_ref --20221202
 	entity := cashFlowMongoDbMapper.GetCashFlowByObjectId(objectId)
 	if entity.IsEmpty() {
 		panic("CashFlow does not exist!")
