@@ -14,8 +14,9 @@ func init() {
 
 func FormatDateFromString(dateString string) time.Time {
 	date, err := time.Parse(DEFAULT_DATE_FORMAT_IN_STRING, dateString)
+	// fixme: using zap log instead.
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return date
 }
