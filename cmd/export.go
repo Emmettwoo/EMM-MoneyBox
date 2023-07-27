@@ -60,7 +60,7 @@ func saveExcelFile(file *excelize.File) {
 	}
 }
 
-func exportData(file *excelize.File, fromDate string, toDate string) {
+func exportData(file *excelize.File, fromDate, toDate string) {
 
 	var cashFlowRowIndex = 1
 
@@ -111,7 +111,7 @@ func exportData(file *excelize.File, fromDate string, toDate string) {
 	}
 }
 
-func writeExcelRow(file *excelize.File, sheetName string, cellPosition string, cellValue interface{}) {
+func writeExcelRow(file *excelize.File, sheetName, cellPosition string, cellValue interface{}) {
 	if err := file.SetCellValue(sheetName, cellPosition, cellValue); err != nil {
 		fmt.Println(err)
 	}
