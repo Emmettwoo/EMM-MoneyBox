@@ -89,8 +89,8 @@ func GetManyInMongoDb(filter bson.D) []bson.M {
 		log.Fatal(err)
 	}
 
-	if err := cursor.All(context.TODO(), &resultInBsonArray); err != nil {
-		log.Fatal(err)
+	if err2 := cursor.All(context.TODO(), &resultInBsonArray); err2 != nil {
+		log.Fatal(err2)
 	}
 
 	return resultInBsonArray
