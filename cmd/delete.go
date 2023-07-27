@@ -16,7 +16,7 @@ var deleteCmd = &cobra.Command{
 	Long: `
 Delete CashFlow in specific type.
 Types:
-  id  ->  delte by objectId like 621b18e3cbab6c2f4d75d0cb.
+  id  ->  delete by objectId like 621b18e3cbab6c2f4d75d0cb.
   date -> delete all CashFlow which belongs to the date like 19700101.`,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
