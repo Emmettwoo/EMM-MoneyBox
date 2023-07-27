@@ -1,6 +1,7 @@
 package util
 
 import (
+	"log"
 	"strconv"
 	"time"
 )
@@ -12,14 +13,17 @@ func init() {
 }
 
 func FormatDateFromString(dateString string) time.Time {
-	date, _ := time.Parse(DEFAULT_DATE_FORMAT_IN_STRING, dateString)
+	date, err := time.Parse(DEFAULT_DATE_FORMAT_IN_STRING, dateString)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return date
 }
 
 func FormatDateToString(date time.Time) string {
-	return strconv.Itoa(date.Year()) + date.Format(DEFAULT_DATE_FORMAT_IN_STRING[4:5]) + strconv.Itoa(date.Day())
+	return date.Format(DEFAULT_DATE_FORMAT_IN_STRING)
 }
 
-func FormatDateToStringWithSlash(year int, month int, day int) string {
+func FormatDateToStringWithSlash(year, month, day int) string {
 	return strconv.Itoa(year) + "/" + strconv.Itoa(month) + "/" + strconv.Itoa(day)
 }
