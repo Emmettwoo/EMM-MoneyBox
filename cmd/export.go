@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/xuri/excelize/v2"
 	"strconv"
@@ -56,7 +55,7 @@ func saveExcelFile(file *excelize.File) {
 	writeExcelRow(file, defaultSheetName, "A2", "Ended Time")
 	writeExcelRow(file, defaultSheetName, "B2", time.Now())
 	if err := file.SaveAs("export.xlsx"); err != nil {
-		fmt.Println(err)
+		util.Logger.Errorln(err)
 	}
 }
 
@@ -72,13 +71,13 @@ func exportData(file *excelize.File, fromDate, toDate string) {
 	for queryDateEnded.After(queryDateCurrent) {
 		dayFlow := dayFlowMapper.GetDayFlowByDate(queryDateCurrent)
 		if dayFlow.IsEmpty() {
-			fmt.Printf("%s's flow is empty.\n", util.FormatDateToString(queryDateCurrent))
+			util.Logger.Debugln("%s's flow is empty.\n", util.FormatDateToString(queryDateCurrent))
 			queryDateCurrent = queryDateCurrent.AddDate(0, 0, 1)
 			continue
 		}
 
 		var queryDateCurrentInString = util.FormatDateToString(queryDateCurrent)
-		fmt.Printf("%s's flow is exporting.\n", queryDateCurrentInString)
+		util.Logger.Debugln("%s's flow is exporting.\n", queryDateCurrentInString)
 		cashFlowArray := cashFlowMapper.GetCashFlowsByObjectIdArray(dayFlow.CashFlows)
 
 		// 年份有變化，則初始化新 Sheet
@@ -113,7 +112,7 @@ func exportData(file *excelize.File, fromDate, toDate string) {
 
 func writeExcelRow(file *excelize.File, sheetName, cellPosition string, cellValue interface{}) {
 	if err := file.SetCellValue(sheetName, cellPosition, cellValue); err != nil {
-		fmt.Println(err)
+		util.Logger.Errorln(err)
 	}
 }
 
