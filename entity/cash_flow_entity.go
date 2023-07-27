@@ -32,27 +32,28 @@ func (entity CashFlowEntity) ToString() string {
 }
 
 func (entity CashFlowEntity) Build(fieldMap map[string]string) CashFlowEntity {
+	var newEntity = entity
 	for key, value := range fieldMap {
 		switch key {
 		case "Id":
 			objectId, err := primitive.ObjectIDFromHex(value)
-			entity.Id = objectId
+			newEntity.Id = objectId
 			if err != nil {
 				util.Logger.Warn("build cash_flow failed with err: " + err.Error())
 			}
 		case "Amount":
 			amount, err := strconv.ParseFloat(value, 64)
-			entity.Amount = amount
+			newEntity.Amount = amount
 			if err != nil {
 				util.Logger.Warn("build cash_flow failed with err: " + err.Error())
 			}
 		case "Category":
-			entity.Category = value
+			newEntity.Category = value
 		case "Desc":
-			entity.Desc = value
+			newEntity.Desc = value
 		case "Remark":
-			entity.Remark = value
+			newEntity.Remark = value
 		}
 	}
-	return entity
+	return newEntity
 }
