@@ -8,5 +8,5 @@ enabled = true
 name = "go"
 enabled = true
 
-  [analyzers.meta]
-  import_root = "github.com/Emmettwoo/EMM-MoneyBox"
+[analyzers.meta]
+import_root = "github.com/Emmettwoo/EMM-MoneyBox"
