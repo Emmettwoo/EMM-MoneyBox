@@ -1,28 +1,22 @@
 package util
 
 import (
-	"log"
 	"strconv"
 	"time"
 )
 
-var DEFAULT_DATE_FORMAT_IN_STRING string
-
-func init() {
-	DEFAULT_DATE_FORMAT_IN_STRING = "20060102"
-}
+var defaultDateFormatInString = "20060102"
 
 func FormatDateFromString(dateString string) time.Time {
-	date, err := time.Parse(DEFAULT_DATE_FORMAT_IN_STRING, dateString)
-	// fixme: using zap log instead.
+	date, err := time.Parse(defaultDateFormatInString, dateString)
 	if err != nil {
-		log.Println(err)
+		Logger.Errorln(err)
 	}
 	return date
 }
 
 func FormatDateToString(date time.Time) string {
-	return date.Format(DEFAULT_DATE_FORMAT_IN_STRING)
+	return date.Format(defaultDateFormatInString)
 }
 
 func FormatDateToStringWithSlash(year, month, day int) string {
