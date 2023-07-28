@@ -61,6 +61,7 @@ Types:
 			} else {
 				cashFlowArray := cashFlowMapper.GetCashFlowsByObjectIdArray(dayFlow.CashFlows)
 				for index, cashFlow := range cashFlowArray {
+					cashFlowMapper.DeleteCashFlowByObjectId(cashFlow.Id)
 					fmt.Println("cashFlow ", index, ": ", cashFlow)
 				}
 			}
