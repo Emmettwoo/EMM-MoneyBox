@@ -43,7 +43,7 @@ Types:
 				}
 
 				cashFlow := cashFlowMapper.DeleteCashFlowByObjectId(objectId)
-				fmt.Println("cashFlow ", currentDelete, ": ", cashFlow)
+				fmt.Println("cashFlow ", currentDelete-1, ": ", cashFlow)
 				currentDelete++
 			}
 
@@ -56,12 +56,12 @@ Types:
 
 			// date format is yyyymmdd
 			dayFlow := dayFlowMapper.DeleteDayFlowByDate(deleteDate)
-			if dayFlow.IsEmpty() {
+			if dayFlow.IsEmpty() || len(dayFlow.CashFlows) == 0 {
 				fmt.Println("The day's flow is empty.")
 			} else {
 				cashFlowArray := cashFlowMapper.GetCashFlowsByObjectIdArray(dayFlow.CashFlows)
 				for index, cashFlow := range cashFlowArray {
-					fmt.Println("cashFlow ", index-1, ": ", cashFlow)
+					fmt.Println("cashFlow ", index, ": ", cashFlow)
 				}
 			}
 
