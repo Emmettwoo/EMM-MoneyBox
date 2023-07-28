@@ -100,14 +100,15 @@ func (DayFlowMongoDbMapper) DeleteDayFlowByDate(date time.Time) entity.DayFlowEn
 	}
 
 	//todo: 還需刪除 flow_ref, cash_flow --20221202
-	entity := dayFlowMongoDbMapper.GetDayFlowByDate(date)
-	if entity.IsEmpty() {
-		panic("DayFlow does not exist!")
+	dayFlow := dayFlowMongoDbMapper.GetDayFlowByDate(date)
+	if dayFlow.IsEmpty() {
+		util.Logger.Infow("day_flow to be delete does not exist",
+			"date", util.FormatDateToString(date))
 	} else {
 		util.OpenMongoDbConnection("dayFlow")
 		util.DeleteManyInMongoDb(filter)
-		return entity
 	}
+	return dayFlow
 }
 
 func convertDayFlowEntity2BsonD(entity entity.DayFlowEntity) bson.D {
