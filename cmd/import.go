@@ -7,8 +7,15 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/xuri/excelize/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"strconv"
 	"time"
 )
+
+var sheetRowNumberLabel = "row_num"
+var requiredRowFieldList = []string{"Date", "Category", "Amount"}
+var importFailedRowNumberList []int
+var importIgnoredRowNumberList []int
+var importSucceedRowNumberList []int
 
 var importCmd = &cobra.Command{
 	Use:   "import {file_name}",
@@ -47,13 +54,18 @@ Example:
 			if err != nil {
 				util.Logger.Error(err.Error())
 			}
-			var cashFlowMap = readSheetData(rows)
-			util.Logger.Infof("%s's flows read", currentSheetName)
+			util.Logger.Infof("processing sheet %s", currentSheetName)
+			var cashFlowMapByDate = readSheetData(rows)
 			// fixme: 保存 cashFlowList 時，要考慮事務細粒度，考慮增加 batchInsert()
-			for date, cashFlowList := range cashFlowMap {
-				saveIntoDB(date, cashFlowList)
-				util.Logger.Infof("%s of %s's flows imported", util.FormatDateToString(date), currentSheetName)
+			for date, cashFlowMapByColumnList := range cashFlowMapByDate {
+				saveIntoDB(date, cashFlowMapByColumnList)
+				util.Logger.Debugf("%s of %s's flows imported", util.FormatDateToString(date), currentSheetName)
 			}
+			util.Logger.Infow("sheet has been imported",
+				"sheet_name", currentSheetName,
+				"succeed_row", importSucceedRowNumberList,
+				"ignored_row", importIgnoredRowNumberList,
+				"failed_row", importFailedRowNumberList)
 		}
 		return nil
 	},
@@ -70,48 +82,56 @@ func readExcelFile(fileName string) *excelize.File {
 /**
  * 讀取工作表的數據，以 date 爲 key 整理 cashFlows
  */
-func readSheetData(sheetRowCursor *excelize.Rows) map[time.Time][]entity.CashFlowEntity {
+func readSheetData(sheetRowCursor *excelize.Rows) map[time.Time][]map[string]string {
 
-	cashFlowMap := make(map[time.Time][]entity.CashFlowEntity)
+	cashFlowMapByDate := make(map[time.Time][]map[string]string)
 
 	// 第一行爲標題行，校驗格式是否正確
 	sheetRowCursor.Next()
+	var currentRowNumber = 1
 	rowColumnList, err := sheetRowCursor.Columns()
 	if err != nil {
 		util.Logger.Error(err.Error())
 	}
-	if !verifySheetTitle(rowColumnList) {
-		return cashFlowMap
+	if !isSheetTitleVerified(rowColumnList) {
+		return cashFlowMapByDate
 	}
 
 	// 遍歷每一行的數據，組裝 CashFlow
 	for sheetRowCursor.Next() {
+		// 更新當前行號
+		currentRowNumber++
+
 		rowColumnList, err = sheetRowCursor.Columns()
 		if err != nil {
 			util.Logger.Error(err.Error())
 		}
 
 		// 依序組裝每一行數據，形成 title-value Map
-		var columnCellMap = map[string]string{}
+		var cashFlowMapByColumn = map[string]string{}
 		for index, colCell := range rowColumnList {
-			columnCellMap[defaultRowTitle[index]] = colCell
+			cashFlowMapByColumn[defaultRowTitle[index]] = colCell
 		}
-		var cashFlow = entity.CashFlowEntity{}.Build(columnCellMap)
-		var cashFlowDate = time.Now()
-		if columnCellMap["Date"] != "" {
-			cashFlowDate = util.FormatDateFromString(columnCellMap["Date"])
+		cashFlowMapByColumn[sheetRowNumberLabel] = strconv.Itoa(currentRowNumber)
+
+		// 必填欄位校驗
+		if !isRequiredFieldSatisfied(currentRowNumber, cashFlowMapByColumn) {
+			importFailedRowNumberList = append(importFailedRowNumberList, currentRowNumber)
+			continue
 		}
-		cashFlowMap[cashFlowDate] = append(cashFlowMap[cashFlowDate], cashFlow)
+
+		var cashFlowDate = util.FormatDateFromString(cashFlowMapByColumn["Date"])
+		cashFlowMapByDate[cashFlowDate] = append(cashFlowMapByDate[cashFlowDate], cashFlowMapByColumn)
 	}
 
 	if err = sheetRowCursor.Close(); err != nil {
 		util.Logger.Error(err.Error())
 	}
 
-	return cashFlowMap
+	return cashFlowMapByDate
 }
 
-func verifySheetTitle(titleColumnList []string) bool {
+func isSheetTitleVerified(titleColumnList []string) bool {
 	for index, colCell := range titleColumnList {
 		if colCell != defaultRowTitle[index] {
 			util.Logger.Warn("sheet title un-expected, parse failed.")
@@ -121,18 +141,35 @@ func verifySheetTitle(titleColumnList []string) bool {
 	return true
 }
 
-func saveIntoDB(cashFlowDate time.Time, cashFlowList []entity.CashFlowEntity) {
-	for _, cashFlow := range cashFlowList {
-		if cashFlow.Id != primitive.NilObjectID {
-			var existedCashFlow = cashFlowMapper.GetCashFlowByObjectId(cashFlow.Id)
+func isRequiredFieldSatisfied(currentRowNumber int, columnCellMap map[string]string) bool {
+	for _, requiredRowField := range requiredRowFieldList {
+		if columnCellMap[requiredRowField] == "" {
+			util.Logger.Errorw("field could not be empty, import failed",
+				sheetRowNumberLabel, currentRowNumber, "field", requiredRowField)
+			return false
+		}
+	}
+	return true
+}
+
+func saveIntoDB(cashFlowDate time.Time, cashFlowMapByColumnList []map[string]string) {
+	for _, cashFlowMapByColumn := range cashFlowMapByColumnList {
+		var cashFlowEntity = entity.CashFlowEntity{}.Build(cashFlowMapByColumn)
+		if cashFlowEntity.Id != primitive.NilObjectID {
+			var existedCashFlow = cashFlowMapper.GetCashFlowByObjectId(cashFlowEntity.Id)
 			if !existedCashFlow.IsEmpty() {
-				util.Logger.Debugw("cash_flow existed, ignored import.",
-					"objectId", cashFlow.Id.Hex())
+				util.Logger.Warnw("cash_flow existed, ignored import.",
+					sheetRowNumberLabel, cashFlowMapByColumn[sheetRowNumberLabel],
+					"objectId", cashFlowEntity.Id.Hex())
+				importIgnoredRowNumberList = append(importIgnoredRowNumberList,
+					util.ToInteger(cashFlowMapByColumn[sheetRowNumberLabel]))
 				continue
 			}
 		}
-		cashFlowMapper.InsertCashFlowByEntity(cashFlow, cashFlowDate)
-		util.Logger.Debug("cash_flow inserted: " + cashFlow.ToString())
+		cashFlowMapper.InsertCashFlowByEntity(cashFlowEntity, cashFlowDate)
+		util.Logger.Debug("cash_flow inserted: " + cashFlowEntity.ToString())
+		importSucceedRowNumberList = append(importSucceedRowNumberList,
+			util.ToInteger(cashFlowMapByColumn[sheetRowNumberLabel]))
 	}
 }
 
