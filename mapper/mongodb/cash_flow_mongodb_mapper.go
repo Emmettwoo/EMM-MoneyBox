@@ -134,13 +134,13 @@ func (CashFlowMongoDbMapper) DeleteCashFlowByObjectId(objectId primitive.ObjectI
 	}
 
 	//todo: 還需刪除 flow_ref --20221202
-	entity := cashFlowMongoDbMapper.GetCashFlowByObjectId(objectId)
-	if entity.IsEmpty() {
+	targetEntity := cashFlowMongoDbMapper.GetCashFlowByObjectId(objectId)
+	if targetEntity.IsEmpty() {
 		panic("CashFlow does not exist!")
 	} else {
 		util.OpenMongoDbConnection("cashFlow")
 		util.DeleteManyInMongoDb(filter)
-		return entity
+		return targetEntity
 	}
 }
 
@@ -161,8 +161,11 @@ func convertCashFlowEntity2BsonD(entity entity.CashFlowEntity) bson.D {
 }
 
 func convertBsonM2CashFlowEntity(bsonM bson.M) entity.CashFlowEntity {
-	var entity entity.CashFlowEntity
+	var newEntity entity.CashFlowEntity
 	bsonBytes, _ := bson.Marshal(bsonM)
-	bson.Unmarshal(bsonBytes, &entity)
-	return entity
+	err := bson.Unmarshal(bsonBytes, &newEntity)
+	if err != nil {
+		panic(err)
+	}
+	return newEntity
 }

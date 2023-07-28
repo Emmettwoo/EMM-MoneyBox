@@ -1,7 +1,6 @@
 package mongodb
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/emmettwoo/EMM-MoneyBox/entity"
@@ -28,7 +27,7 @@ func (DayFlowMongoDbMapper) GetDayFlowByObjectId(objectId primitive.ObjectID) en
 func (DayFlowMongoDbMapper) GetDayFlowByDate(date time.Time) entity.DayFlowEntity {
 
 	// Golang有趣的日期转换机制，不过转出来是String，数据库是int，所以转一下类型。
-	monthInInt, _ := strconv.Atoi(date.Format("01"))
+	monthInInt := util.ToInteger(date.Format("01"))
 
 	// 查询条件为指定的年月日，设计上一天只会对应一笔dayFlow数据。
 	filter := bson.D{
@@ -48,15 +47,15 @@ func (DayFlowMongoDbMapper) InsertDayFlowByEntity(entity entity.DayFlowEntity) p
 
 func (DayFlowMongoDbMapper) InsertDayFlowByDate(date time.Time) primitive.ObjectID {
 
-	monthInInt, _ := strconv.Atoi(date.Format("01"))
-	entity := entity.DayFlowEntity{
+	monthInInt := util.ToInteger(date.Format("01"))
+	newEntity := entity.DayFlowEntity{
 		Day:   date.Day(),
 		Month: monthInInt,
 		Year:  date.Year(),
 	}
 
 	util.OpenMongoDbConnection("dayFlow")
-	return util.InsertOneInMongoDb(convertDayFlowEntity2BsonD(entity))
+	return util.InsertOneInMongoDb(convertDayFlowEntity2BsonD(newEntity))
 }
 
 func (DayFlowMongoDbMapper) UpdateDayFlowByEntity(entity entity.DayFlowEntity) bool {
@@ -80,19 +79,19 @@ func (DayFlowMongoDbMapper) DeleteDayFlowByObjectId(objectId primitive.ObjectID)
 	}
 
 	//todo: 還需刪除 flow_ref, cash_flow --20221202
-	entity := dayFlowMongoDbMapper.GetDayFlowByObjectId(objectId)
-	if entity.IsEmpty() {
+	targetEntity := dayFlowMongoDbMapper.GetDayFlowByObjectId(objectId)
+	if targetEntity.IsEmpty() {
 		panic("DayFlow does not exist!")
 	} else {
 		util.OpenMongoDbConnection("dayFlow")
 		util.DeleteManyInMongoDb(filter)
-		return entity
+		return targetEntity
 	}
 }
 
 func (DayFlowMongoDbMapper) DeleteDayFlowByDate(date time.Time) entity.DayFlowEntity {
 
-	monthInInt, _ := strconv.Atoi(date.Format("01"))
+	monthInInt := util.ToInteger(date.Format("01"))
 	filter := bson.D{
 		primitive.E{Key: "day", Value: date.Day()},
 		primitive.E{Key: "month", Value: monthInInt},
@@ -130,6 +129,9 @@ func convertDayFlowEntity2BsonD(entity entity.DayFlowEntity) bson.D {
 func convertBsonM2DayFlowEntity(bsonM bson.M) entity.DayFlowEntity {
 	var entity entity.DayFlowEntity
 	bsonBytes, _ := bson.Marshal(bsonM)
-	bson.Unmarshal(bsonBytes, &entity)
+	err := bson.Unmarshal(bsonBytes, &entity)
+	if err != nil {
+		panic(err)
+	}
 	return entity
 }
