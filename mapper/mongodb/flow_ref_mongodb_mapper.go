@@ -32,7 +32,7 @@ func (FlowRefMongoDbMapper) GetFlowRefByDayFlowId(objectId primitive.ObjectID) [
 	util.OpenMongoDbConnection("flowRef")
 	flowRefBsonArray := util.GetManyInMongoDb(filter)
 
-	flowRefEntityArray := []entity.FlowRefEntity{}
+	var flowRefEntityArray []entity.FlowRefEntity
 	for _, flowRef := range flowRefBsonArray {
 		flowRefEntityArray = append(flowRefEntityArray, convertBsonM2FlowRefEntity(flowRef))
 	}
