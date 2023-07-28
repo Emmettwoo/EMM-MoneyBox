@@ -127,11 +127,11 @@ func convertDayFlowEntity2BsonD(entity entity.DayFlowEntity) bson.D {
 }
 
 func convertBsonM2DayFlowEntity(bsonM bson.M) entity.DayFlowEntity {
-	var entity entity.DayFlowEntity
+	var newEntity entity.DayFlowEntity
 	bsonBytes, _ := bson.Marshal(bsonM)
-	err := bson.Unmarshal(bsonBytes, &entity)
+	err := bson.Unmarshal(bsonBytes, &newEntity)
 	if err != nil {
 		panic(err)
 	}
-	return entity
+	return newEntity
 }
