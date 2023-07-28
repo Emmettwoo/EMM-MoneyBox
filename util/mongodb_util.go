@@ -67,7 +67,7 @@ func GetOneInMongoDb(filter bson.D) bson.M {
 
 	// 查詢失敗處理
 	if err == mongo.ErrNoDocuments {
-		Logger.Warnln("record does not exist")
+		// Logger.Warnln("record does not exist")
 	} else if err != nil {
 		log.Fatal(err)
 	}
@@ -84,7 +84,7 @@ func GetManyInMongoDb(filter bson.D) []bson.M {
 
 	// 查詢失敗處理
 	if err == mongo.ErrNoDocuments {
-		Logger.Warnln("record does not exist")
+		// Logger.Warnln("record does not exist")
 	} else if err != nil {
 		log.Fatal(err)
 	}

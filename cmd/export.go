@@ -64,7 +64,8 @@ func exportData(file *excelize.File, fromDate, toDate string) {
 	var cashFlowRowIndex = 1
 
 	var queryDateCurrent = util.FormatDateFromString(fromDate)
-	var queryDateEnded = util.FormatDateFromString(toDate)
+	// add one day for include the last day's data
+	var queryDateEnded = util.FormatDateFromString(toDate).AddDate(0, 0, 1)
 
 	var currentYearAndMonth = "nil"
 
