@@ -1,22 +1,25 @@
 package mapper
 
 import (
-	"time"
-
 	"github.com/emmettwoo/EMM-MoneyBox/entity"
 	"github.com/emmettwoo/EMM-MoneyBox/mapper/mongodb"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"time"
 )
+
+var CashFlowTableName = "cash_flow"
 
 type CashFlowMapper interface {
 	GetCashFlowByObjectId(objectId primitive.ObjectID) entity.CashFlowEntity
 	GetCashFlowsByObjectIdArray(objectIdArray []primitive.ObjectID) []entity.CashFlowEntity
+	GetCashFlowsByBelongsDate(belongsDate time.Time) []entity.CashFlowEntity
 	GetCashFlowsByExactDesc(desc string) []entity.CashFlowEntity
 	GetCashFlowsByFuzzyDesc(desc string) []entity.CashFlowEntity
-	InsertCashFlowByEntity(entity entity.CashFlowEntity, date time.Time) primitive.ObjectID
+	InsertCashFlowByEntity(entity entity.CashFlowEntity) primitive.ObjectID
 	UpdateCashFlowByEntity(entity entity.CashFlowEntity) bool
 	DeleteCashFlowByObjectId(objectId primitive.ObjectID) entity.CashFlowEntity
+	DeleteCashFlowByBelongsDate(belongsDate time.Time) []entity.CashFlowEntity
 }
 
 func GetCashFlowMapper() CashFlowMapper {

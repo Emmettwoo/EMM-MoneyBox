@@ -13,15 +13,15 @@ import (
 
 var outcomeCmd = &cobra.Command{
 	Use:   "outcome {amount} {category} [date] [desc]",
-	Short: "outcome one new CashFlow.",
+	Short: "add new outcome cash_flow",
 	Long: `
 Insert one new outcome CashFlow.
 
 Params:
-  amount  ->  float value with two digits after the dot.
-  category  ->  any string, for category purpose in the comming version.
-  date  ->  define CashFlow belongs date, current date by default.
-  desc  ->  other describe string for this CashFlow.`,
+  amount  ->  float value with most two digits after the dot.
+  category  ->  category name that already created.
+  date  ->  define cash_flow belongs date, current date by default.
+  desc  ->  other describe string for this cash_flow.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		if len(args) < 2 {
@@ -37,8 +37,11 @@ Params:
 		amount, _ = decimal.NewFromFloat(amount).Round(2).Float64()
 
 		// 必填參數2: 類別
-		// todo(emmett): 可以維護一個 category 列表，僅允許設定好的類別變數
 		category := args[1]
+		categoryEntity := CategoryMapper.GetCategoryByName(category)
+		if categoryEntity.IsEmpty() {
+			panic("category does not exist")
+		}
 
 		// 選填參數3: 日期（默認當天）
 		date := time.Time{}
@@ -54,11 +57,13 @@ Params:
 		}
 
 		newCashFlowId := cashFlowMapper.InsertCashFlowByEntity(entity.CashFlowEntity{
-			Amount:   amount,
-			Category: category,
-			Desc:     desc,
-			Remark:   "",
-		}, date)
+			CategoryId:  categoryEntity.Id,
+			BelongsDate: date,
+			Type:        "OUTCOME",
+			Amount:      amount,
+			Desc:        desc,
+			Remark:      "",
+		})
 
 		fmt.Println(cashFlowMapper.GetCashFlowByObjectId(newCashFlowId))
 		return nil

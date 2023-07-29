@@ -11,11 +11,11 @@ import (
 )
 
 var defaultSheetName = "report"
-var defaultRowTitle = []string{"Id", "Date", "Category", "Amount", "Desc"}
+var defaultRowTitle = []string{"Id", "Category", "Date", "Type", "Amount", "Desc"}
 
 var exportCmd = &cobra.Command{
 	Use:   "export {from_date} {to_date}",
-	Short: "Export data to excel",
+	Short: "export data to excel",
 	Long: `Export specifics data into a excel sheet. 
 
 Example:
@@ -70,8 +70,8 @@ func exportData(file *excelize.File, fromDate, toDate string) {
 	var currentYearAndMonth = "nil"
 
 	for queryDateEnded.After(queryDateCurrent) {
-		dayFlow := dayFlowMapper.GetDayFlowByDate(queryDateCurrent)
-		if dayFlow.IsEmpty() {
+		cashFlowArray := cashFlowMapper.GetCashFlowsByBelongsDate(queryDateCurrent)
+		if len(cashFlowArray) == 0 {
 			util.Logger.Debugln("%s's flow is empty.\n", util.FormatDateToString(queryDateCurrent))
 			queryDateCurrent = queryDateCurrent.AddDate(0, 0, 1)
 			continue
@@ -79,7 +79,6 @@ func exportData(file *excelize.File, fromDate, toDate string) {
 
 		var queryDateCurrentInString = util.FormatDateToString(queryDateCurrent)
 		util.Logger.Debugln("%s's flow is exporting.\n", queryDateCurrentInString)
-		cashFlowArray := cashFlowMapper.GetCashFlowsByObjectIdArray(dayFlow.CashFlows)
 
 		// 年份有變化，則初始化新 Sheet
 		var newYearAndMonth = queryDateCurrentInString[0:6]
@@ -95,16 +94,20 @@ func exportData(file *excelize.File, fromDate, toDate string) {
 			writeExcelRow(file, currentYearAndMonth, "C1", defaultRowTitle[2])
 			writeExcelRow(file, currentYearAndMonth, "D1", defaultRowTitle[3])
 			writeExcelRow(file, currentYearAndMonth, "E1", defaultRowTitle[4])
+			writeExcelRow(file, currentYearAndMonth, "F1", defaultRowTitle[4])
 		}
 
 		for _, cashFlow := range cashFlowArray {
 			cashFlowRowIndex++
 			var cashFlowIndexInString = strconv.Itoa(cashFlowRowIndex)
+			// refer to hardcode defaultRowTitle, bad idea.
 			writeExcelRow(file, currentYearAndMonth, "A"+cashFlowIndexInString, cashFlow.Id.Hex())
-			writeExcelRow(file, currentYearAndMonth, "B"+cashFlowIndexInString, queryDateCurrentInString)
-			writeExcelRow(file, currentYearAndMonth, "C"+cashFlowIndexInString, cashFlow.Category)
-			writeExcelRow(file, currentYearAndMonth, "D"+cashFlowIndexInString, cashFlow.Amount)
-			writeExcelRow(file, currentYearAndMonth, "E"+cashFlowIndexInString, cashFlow.Desc)
+			writeExcelRow(file, currentYearAndMonth, "B"+cashFlowIndexInString,
+				CategoryMapper.GetCategoryByObjectId(cashFlow.CategoryId))
+			writeExcelRow(file, currentYearAndMonth, "C"+cashFlowIndexInString, queryDateCurrentInString)
+			writeExcelRow(file, currentYearAndMonth, "D"+cashFlowIndexInString, cashFlow.Type)
+			writeExcelRow(file, currentYearAndMonth, "E"+cashFlowIndexInString, cashFlow.Amount)
+			writeExcelRow(file, currentYearAndMonth, "F"+cashFlowIndexInString, cashFlow.Desc)
 		}
 
 		queryDateCurrent = queryDateCurrent.AddDate(0, 0, 1)

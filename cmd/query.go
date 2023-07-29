@@ -12,9 +12,9 @@ import (
 
 var queryCmd = &cobra.Command{
 	Use:   "query {type} [condition]",
-	Short: "Query for CashFlow data.",
+	Short: "query for cash_flow data",
 	Long: `
-Query for CashFlow data.
+query for cash_flow data.
 
 Types:
   id           ->  query by id, pass condition like 6241a836c72c65d9f343d891.
@@ -49,19 +49,18 @@ Types:
 				queryDate = util.FormatDateFromString(args[1])
 			}
 
-			dayFlow := dayFlowMapper.GetDayFlowByDate(queryDate)
+			cashFlowList := cashFlowMapper.GetCashFlowsByBelongsDate(queryDate)
 
-			if dayFlow.IsEmpty() {
-				fmt.Println("The day's flow is empty.")
+			if len(cashFlowList) == 0 {
+				fmt.Println("the day's flow is empty")
 			} else {
-				cashFlowArray := cashFlowMapper.GetCashFlowsByObjectIdArray(dayFlow.CashFlows)
-				for index, cashFlow := range cashFlowArray {
-					fmt.Println("cashFlow ", index, ": ", cashFlow.ToString())
+				for index, cashFlow := range cashFlowList {
+					fmt.Println("cash_flow ", index, ": ", cashFlow.ToString())
 				}
 			}
 
 		case "desc":
-			fmt.Println("Please try with desc_exact or desc_fuzzy instead.")
+			fmt.Println("please try with desc_exact or desc_fuzzy instead")
 
 		case "desc_exact":
 			if len(args) < 2 {
@@ -70,12 +69,12 @@ Types:
 
 			matchedCashFlow := cashFlowMapper.GetCashFlowsByExactDesc(args[1])
 			if len(matchedCashFlow) == 0 {
-				fmt.Println("No Matched CashFlows.")
+				fmt.Println("no matched cash_flows")
 				return nil
 			}
 
 			for index, cashFlow := range matchedCashFlow {
-				fmt.Println("cashFlow ", index, ": ", cashFlow.ToString())
+				fmt.Println("cash_flow ", index, ": ", cashFlow.ToString())
 			}
 
 		case "desc_fuzzy":
@@ -85,16 +84,16 @@ Types:
 
 			matchedCashFlow := cashFlowMapper.GetCashFlowsByFuzzyDesc(args[1])
 			if len(matchedCashFlow) == 0 {
-				fmt.Println("No Matched CashFlows.")
+				fmt.Println("no matched cash_flows")
 				return nil
 			}
 
 			for index, cashFlow := range matchedCashFlow {
-				fmt.Println("cashFlow ", index, ": ", cashFlow.ToString())
+				fmt.Println("cash_flow ", index, ": ", cashFlow.ToString())
 			}
 
 		default:
-			fmt.Println("Not supported query type.")
+			fmt.Println("Not supported query type")
 		}
 
 		return nil

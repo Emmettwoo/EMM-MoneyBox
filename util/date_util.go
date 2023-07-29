@@ -1,7 +1,6 @@
 package util
 
 import (
-	"strconv"
 	"time"
 )
 
@@ -17,8 +16,4 @@ func FormatDateFromString(dateString string) time.Time {
 
 func FormatDateToString(date time.Time) string {
 	return date.Format(defaultDateFormatInString)
-}
-
-func FormatDateToStringWithSlash(year, month, day int) string {
-	return strconv.Itoa(year) + "/" + strconv.Itoa(month) + "/" + strconv.Itoa(day)
 }

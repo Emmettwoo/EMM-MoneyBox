@@ -12,14 +12,14 @@ import (
 )
 
 var sheetRowNumberLabel = "row_num"
-var requiredRowFieldList = []string{"Date", "Category", "Amount"}
+var requiredRowFieldList = []string{"Category", "Date", "Type", "Amount"}
 var importFailedRowNumberList []int
 var importIgnoredRowNumberList []int
 var importSucceedRowNumberList []int
 
 var importCmd = &cobra.Command{
-	Use:   "import {file_name}",
-	Short: "Import data from excel",
+	Use:   "import {file_path}",
+	Short: "import data from excel",
 	Long: `Import excel data into your database. 
 
 Example:
@@ -27,7 +27,7 @@ Example:
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		if len(args) < 1 {
-			return errors.New("must provide file name")
+			return errors.New("must provide file path")
 		}
 
 		// 打開並讀取目標文件
@@ -52,13 +52,13 @@ Example:
 
 			rows, err := file.Rows(currentSheetName)
 			if err != nil {
-				util.Logger.Error(err.Error())
+				util.Logger.Errorw("read sheet rows failed", "error", err)
 			}
 			util.Logger.Infof("processing sheet %s", currentSheetName)
 			var cashFlowMapByDate = readSheetData(rows)
 			// fixme: 保存 cashFlowList 時，要考慮事務細粒度，考慮增加 batchInsert()
 			for date, cashFlowMapByColumnList := range cashFlowMapByDate {
-				saveIntoDB(date, cashFlowMapByColumnList)
+				saveIntoDB(cashFlowMapByColumnList)
 				util.Logger.Debugf("%s of %s's flows imported", util.FormatDateToString(date), currentSheetName)
 			}
 			util.Logger.Infow("sheet has been imported",
@@ -152,7 +152,7 @@ func isRequiredFieldSatisfied(currentRowNumber int, columnCellMap map[string]str
 	return true
 }
 
-func saveIntoDB(cashFlowDate time.Time, cashFlowMapByColumnList []map[string]string) {
+func saveIntoDB(cashFlowMapByColumnList []map[string]string) {
 	for _, cashFlowMapByColumn := range cashFlowMapByColumnList {
 		var cashFlowEntity = entity.CashFlowEntity{}.Build(cashFlowMapByColumn)
 		if cashFlowEntity.Id != primitive.NilObjectID {
@@ -166,7 +166,7 @@ func saveIntoDB(cashFlowDate time.Time, cashFlowMapByColumnList []map[string]str
 				continue
 			}
 		}
-		cashFlowMapper.InsertCashFlowByEntity(cashFlowEntity, cashFlowDate)
+		cashFlowMapper.InsertCashFlowByEntity(cashFlowEntity)
 		util.Logger.Debug("cash_flow inserted: " + cashFlowEntity.ToString())
 		importSucceedRowNumberList = append(importSucceedRowNumberList,
 			util.ToInteger(cashFlowMapByColumn[sheetRowNumberLabel]))
