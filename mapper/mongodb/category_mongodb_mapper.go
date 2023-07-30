@@ -1,60 +1,149 @@
 package mongodb
 
 import (
-    "github.com/emmettwoo/EMM-MoneyBox/entity"
-    "github.com/emmettwoo/EMM-MoneyBox/mapper"
-    "github.com/emmettwoo/EMM-MoneyBox/util"
-    "go.mongodb.org/mongo-driver/bson"
-    "go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/emmettwoo/EMM-MoneyBox/entity"
+	"github.com/emmettwoo/EMM-MoneyBox/util"
+	"github.com/emmettwoo/EMM-MoneyBox/util/database"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"time"
 )
-
-type CategoryMongoDbMapper struct{}
 
 var categoryMongoDbMapper CategoryMongoDbMapper
 
-func (CategoryMongoDbMapper) GetCategoryByObjectId(objectId primitive.ObjectID) entity.CategoryEntity {
+type CategoryMongoDbMapper struct{}
 
-    filter := bson.D{
-        primitive.E{Key: "_id", Value: objectId},
-    }
+func (CategoryMongoDbMapper) GetCategoryByObjectId(plainId string) entity.CategoryEntity {
 
-    util.OpenMongoDbConnection(mapper.CategoryTableName)
-    return convertBsonM2CategoryEntity(util.GetOneInMongoDb(filter))
+	objectId := util.Convert2ObjectId(plainId)
+	if plainId == "" || objectId == primitive.NilObjectID {
+		util.Logger.Warnln("category's id is not acceptable")
+		return entity.CategoryEntity{}
+	}
+
+	filter := bson.D{
+		primitive.E{Key: "_id", Value: objectId},
+	}
+
+	database.OpenMongoDbConnection(database.CategoryTableName)
+	defer database.CloseMongoDbConnection()
+	return convertBsonM2CategoryEntity(database.GetOneInMongoDB(filter))
 }
 
 func (CategoryMongoDbMapper) GetCategoryByName(categoryName string) entity.CategoryEntity {
 
-    filter := bson.D{
-        primitive.E{Key: "name", Value: categoryName},
-    }
+	filter := bson.D{
+		primitive.E{Key: "name", Value: categoryName},
+	}
 
-    util.OpenMongoDbConnection(mapper.CategoryTableName)
+	database.OpenMongoDbConnection(database.CategoryTableName)
+	defer database.CloseMongoDbConnection()
+	return convertBsonM2CategoryEntity(database.GetOneInMongoDB(filter))
+}
 
-    return convertBsonM2CategoryEntity(util.GetOneInMongoDb(filter))
+func (CategoryMongoDbMapper) InsertCategoryByEntity(newEntity entity.CategoryEntity) string {
+
+	var operatingTime = time.Now()
+	newEntity.CreateTime = operatingTime
+	newEntity.ModifyTime = operatingTime
+
+	database.OpenMongoDbConnection(database.CategoryTableName)
+	defer database.CloseMongoDbConnection()
+
+	var newCategoryId = database.InsertOneInMongoDB(convertCategoryEntity2BsonD(newEntity))
+	return newCategoryId.Hex()
+}
+
+func (CategoryMongoDbMapper) UpdateCategoryByEntity(plainId string) entity.CategoryEntity {
+
+	var objectId = util.Convert2ObjectId(plainId)
+	if plainId == "" || objectId == primitive.NilObjectID {
+		util.Logger.Warnln("category's id is not acceptable")
+		return entity.CategoryEntity{}
+	}
+
+	filter := bson.D{
+		primitive.E{Key: "_id", Value: objectId},
+	}
+
+	database.OpenMongoDbConnection(database.CategoryTableName)
+	defer database.CloseMongoDbConnection()
+
+	var targetEntity = convertBsonM2CategoryEntity(database.GetOneInMongoDB(filter))
+	if targetEntity.IsEmpty() {
+		util.Logger.Infoln("category is not exist")
+		return entity.CategoryEntity{}
+	}
+
+	// todo: update specific fields by passing params (parentId, name)
+
+	targetEntity.ModifyTime = time.Now()
+	if database.UpdateManyInMongoDB(filter, convertCategoryEntity2BsonD(targetEntity)) == 0 {
+		util.Logger.Errorln("category update failed")
+		return entity.CategoryEntity{}
+	}
+
+	return entity.CategoryEntity{}
+}
+
+func (CategoryMongoDbMapper) DeleteCategoryByObjectId(plainId string) entity.CategoryEntity {
+
+	objectId := util.Convert2ObjectId(plainId)
+	if plainId == "" || objectId == primitive.NilObjectID {
+		util.Logger.Warnln("category's id is not acceptable")
+		return entity.CategoryEntity{}
+	}
+
+	filter := bson.D{
+		primitive.E{Key: "_id", Value: objectId},
+	}
+
+	database.OpenMongoDbConnection(database.CategoryTableName)
+	defer database.CloseMongoDbConnection()
+
+	var targetEntity = convertBsonM2CategoryEntity(database.GetOneInMongoDB(filter))
+	if targetEntity.IsEmpty() {
+		util.Logger.Infoln("category is not exist")
+		return entity.CategoryEntity{}
+	}
+
+	// can not delete a category that has refer cash_flow(s).
+	if len(cashFlowMongoDbMapper.GetCashFlowsByCategoryId(targetEntity.Id.Hex())) != 0 {
+		util.Logger.Infoln("can not delete a category which has cash_flows refer to")
+		return entity.CategoryEntity{}
+	}
+
+	if database.DeleteManyInMongoDB(filter) == 0 {
+		util.Logger.Errorln("category delete failed")
+		return entity.CategoryEntity{}
+	}
+	return targetEntity
 }
 
 func convertCategoryEntity2BsonD(entity entity.CategoryEntity) bson.D {
 
-    // 为空时自动生成新Id
-    if entity.Id == primitive.NilObjectID {
-        entity.Id = primitive.NewObjectID()
-    }
+	// 为空时自动生成新Id
+	if entity.Id == primitive.NilObjectID {
+		entity.Id = primitive.NewObjectID()
+	}
 
-    return bson.D{
-        primitive.E{Key: "_id", Value: entity.Id},
-        primitive.E{Key: "parent_id", Value: entity.ParentId},
-        primitive.E{Key: "name", Value: entity.Name},
-        primitive.E{Key: "remark", Value: entity.Remark},
-    }
+	return bson.D{
+		primitive.E{Key: "_id", Value: entity.Id},
+		primitive.E{Key: "parent_id", Value: entity.ParentId},
+		primitive.E{Key: "name", Value: entity.Name},
+		primitive.E{Key: "remark", Value: entity.Remark},
+		primitive.E{Key: "create_time", Value: entity.CreateTime},
+		primitive.E{Key: "modify_time", Value: entity.ModifyTime},
+	}
 }
 
 func convertBsonM2CategoryEntity(bsonM bson.M) entity.CategoryEntity {
 
-    var newEntity entity.CategoryEntity
-    bsonBytes, _ := bson.Marshal(bsonM)
-    err := bson.Unmarshal(bsonBytes, &newEntity)
-    if err != nil {
-        panic(err)
-    }
-    return newEntity
+	var newEntity entity.CategoryEntity
+	bsonBytes, _ := bson.Marshal(bsonM)
+	err := bson.Unmarshal(bsonBytes, &newEntity)
+	if err != nil {
+		panic(err)
+	}
+	return newEntity
 }

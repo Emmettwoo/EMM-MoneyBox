@@ -1,36 +1,51 @@
-package cmd
+package manage_service
 
 import (
 	"errors"
+	"github.com/emmettwoo/EMM-MoneyBox/mapper"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/xuri/excelize/v2"
 	"strconv"
+	"strings"
 	"time"
-
-	"github.com/spf13/cobra"
 )
 
 var defaultSheetName = "report"
-var defaultRowTitle = []string{"Id", "Category", "Date", "Type", "Amount", "Desc"}
+var defaultRowTitle = []string{"Id", "CategoryId", "CategoryName", "BelongsDate", "FlowType", "Amount", "Description"}
 
-var exportCmd = &cobra.Command{
-	Use:   "export {from_date} {to_date}",
-	Short: "export data to excel",
-	Long: `Export specifics data into a excel sheet. 
+func ExportService(fromDateInString string, toDateInString string, filePath string) error {
 
-Example:
-  EMM-MoneyBox export 20230101 20231231`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	if filePath == "" {
+		filePath = "./export.xlsx"
+	}
+	var fromDate = util.FormatDateFromString(fromDateInString)
+	var toDate = util.FormatDateFromString(toDateInString)
+	if err := isExportRequiredFiledSatisfied(fromDate, toDate, filePath); err != nil {
+		return err
+	}
 
-		if len(args) < 2 {
-			return errors.New("must provide from_date and to_date")
-		}
+	file := createExcelFile()
+	exportData(file, fromDateInString, toDateInString)
+	saveExcelFile(file, filePath)
+	return nil
+}
 
-		file := createExcelFile()
-		exportData(file, args[0], args[1])
-		saveExcelFile(file)
-		return nil
-	},
+func isExportRequiredFiledSatisfied(fromDate time.Time, toDate time.Time, filePath string) error {
+
+	if util.IsDateTimeEmpty(fromDate) {
+		return errors.New("from_date could not be empty")
+	}
+	if util.IsDateTimeEmpty(toDate) {
+		return errors.New("to_date could not be empty")
+	}
+	if fromDate.After(toDate) {
+		return errors.New("from_date should before to_date")
+	}
+	if !strings.HasSuffix(filePath, ".xlsx") {
+		return errors.New("file_path should be end with '.xlsx'")
+	}
+
+	return nil
 }
 
 func createExcelFile() *excelize.File {
@@ -49,12 +64,13 @@ func createExcelFile() *excelize.File {
 	return file
 }
 
-func saveExcelFile(file *excelize.File) {
+func saveExcelFile(file *excelize.File, filePath string) {
 
 	// 根據指定路徑保存活頁簿
 	writeExcelRow(file, defaultSheetName, "A2", "Ended Time")
 	writeExcelRow(file, defaultSheetName, "B2", time.Now())
-	if err := file.SaveAs("export.xlsx"); err != nil {
+	// fixme: support specific output path
+	if err := file.SaveAs(filePath); err != nil {
 		util.Logger.Errorln(err)
 	}
 }
@@ -70,15 +86,15 @@ func exportData(file *excelize.File, fromDate, toDate string) {
 	var currentYearAndMonth = "nil"
 
 	for queryDateEnded.After(queryDateCurrent) {
-		cashFlowArray := cashFlowMapper.GetCashFlowsByBelongsDate(queryDateCurrent)
+		cashFlowArray := mapper.CashFlowCommonMapper.GetCashFlowsByBelongsDate(queryDateCurrent)
 		if len(cashFlowArray) == 0 {
-			util.Logger.Debugln("%s's flow is empty.\n", util.FormatDateToString(queryDateCurrent))
+			util.Logger.Debugf("%s's flow is empty.\n", util.FormatDateToString(queryDateCurrent))
 			queryDateCurrent = queryDateCurrent.AddDate(0, 0, 1)
 			continue
 		}
 
 		var queryDateCurrentInString = util.FormatDateToString(queryDateCurrent)
-		util.Logger.Debugln("%s's flow is exporting.\n", queryDateCurrentInString)
+		util.Logger.Debugf("%s's flow is exporting.\n", queryDateCurrentInString)
 
 		// 年份有變化，則初始化新 Sheet
 		var newYearAndMonth = queryDateCurrentInString[0:6]
@@ -94,7 +110,8 @@ func exportData(file *excelize.File, fromDate, toDate string) {
 			writeExcelRow(file, currentYearAndMonth, "C1", defaultRowTitle[2])
 			writeExcelRow(file, currentYearAndMonth, "D1", defaultRowTitle[3])
 			writeExcelRow(file, currentYearAndMonth, "E1", defaultRowTitle[4])
-			writeExcelRow(file, currentYearAndMonth, "F1", defaultRowTitle[4])
+			writeExcelRow(file, currentYearAndMonth, "F1", defaultRowTitle[5])
+			writeExcelRow(file, currentYearAndMonth, "G1", defaultRowTitle[6])
 		}
 
 		for _, cashFlow := range cashFlowArray {
@@ -102,12 +119,13 @@ func exportData(file *excelize.File, fromDate, toDate string) {
 			var cashFlowIndexInString = strconv.Itoa(cashFlowRowIndex)
 			// refer to hardcode defaultRowTitle, bad idea.
 			writeExcelRow(file, currentYearAndMonth, "A"+cashFlowIndexInString, cashFlow.Id.Hex())
-			writeExcelRow(file, currentYearAndMonth, "B"+cashFlowIndexInString,
-				CategoryMapper.GetCategoryByObjectId(cashFlow.CategoryId))
-			writeExcelRow(file, currentYearAndMonth, "C"+cashFlowIndexInString, queryDateCurrentInString)
-			writeExcelRow(file, currentYearAndMonth, "D"+cashFlowIndexInString, cashFlow.Type)
-			writeExcelRow(file, currentYearAndMonth, "E"+cashFlowIndexInString, cashFlow.Amount)
-			writeExcelRow(file, currentYearAndMonth, "F"+cashFlowIndexInString, cashFlow.Desc)
+			writeExcelRow(file, currentYearAndMonth, "B"+cashFlowIndexInString, cashFlow.CategoryId.Hex())
+			writeExcelRow(file, currentYearAndMonth, "C"+cashFlowIndexInString,
+				mapper.CategoryCommonMapper.GetCategoryByObjectId(cashFlow.CategoryId.Hex()).Name)
+			writeExcelRow(file, currentYearAndMonth, "D"+cashFlowIndexInString, queryDateCurrentInString)
+			writeExcelRow(file, currentYearAndMonth, "E"+cashFlowIndexInString, cashFlow.FlowType)
+			writeExcelRow(file, currentYearAndMonth, "F"+cashFlowIndexInString, cashFlow.Amount)
+			writeExcelRow(file, currentYearAndMonth, "G"+cashFlowIndexInString, cashFlow.Description)
 		}
 
 		queryDateCurrent = queryDateCurrent.AddDate(0, 0, 1)
@@ -118,8 +136,4 @@ func writeExcelRow(file *excelize.File, sheetName, cellPosition string, cellValu
 	if err := file.SetCellValue(sheetName, cellPosition, cellValue); err != nil {
 		util.Logger.Errorln(err)
 	}
-}
-
-func init() {
-	rootCmd.AddCommand(exportCmd)
 }

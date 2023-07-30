@@ -1,6 +1,7 @@
 package util
 
 import (
+    "bytes"
     "encoding/json"
     "go.uber.org/zap"
     "go.uber.org/zap/zapcore"
@@ -10,16 +11,29 @@ import (
 var consoleLogger *zap.Logger
 var fileLogger *zap.Logger
 var sugaredConsoleLogger *zap.SugaredLogger
-var Logger *zap.SugaredLogger
+var Logger = getLogger()
 var FileLogger *zap.Logger
 
-func init() {
-    consoleLogger = initConsoleLogger()
-    sugaredConsoleLogger = consoleLogger.Sugar()
-    Logger = sugaredConsoleLogger
+func initLogger() {
+    if consoleLogger == nil {
+        consoleLogger = initConsoleLogger()
+    }
+    if sugaredConsoleLogger == nil {
+        sugaredConsoleLogger = consoleLogger.Sugar()
+    }
+    if fileLogger == nil {
+        fileLogger = initFileLogger()
+        FileLogger = fileLogger
+    }
 
-    fileLogger = initFileLogger()
-    FileLogger = fileLogger
+    consoleLogger.Debug("loggers initialize succeed")
+}
+
+func getLogger() *zap.SugaredLogger {
+    if sugaredConsoleLogger == nil {
+        initLogger()
+    }
+    return sugaredConsoleLogger
 }
 
 func initFileLogger() *zap.Logger {
@@ -32,20 +46,28 @@ func initFileLogger() *zap.Logger {
 }
 
 func initConsoleLogger() *zap.Logger {
+	
     // newLogger, _ := zap.NewProduction()
-    rawJSON := []byte(`{
-	         "level": "debug",
-	         "encoding": "json",
-	         "outputPaths": ["stdout"],
-	         "errorOutputPaths": ["stderr"],
-	         "encoderConfig": {
-	           "messageKey": "message",
-	           "levelKey": "level",
-	           "levelEncoder": "lowercase"
-	         }
-	       }`)
+    var loggerLevel = GetConfigByKey("logger.level")
+    if loggerLevel == "" {
+        loggerLevel = "info"
+    }
+
+    var jsonConfiguration bytes.Buffer
+    jsonConfiguration.WriteString(`{`)
+    jsonConfiguration.WriteString(`  "level": "` + loggerLevel + `",`)
+    jsonConfiguration.WriteString(`  "encoding": "json",`)
+    jsonConfiguration.WriteString(`  "outputPaths": ["stdout"],`)
+    jsonConfiguration.WriteString(`  "errorOutputPaths": ["stderr"],`)
+    jsonConfiguration.WriteString(`  "encoderConfig": {`)
+    jsonConfiguration.WriteString(`    "messageKey": "message",`)
+    jsonConfiguration.WriteString(`    "levelKey": "level",`)
+    jsonConfiguration.WriteString(`    "levelEncoder": "lowercase"`)
+    jsonConfiguration.WriteString(`  }`)
+    jsonConfiguration.WriteString(`}`)
+
     var cfg zap.Config
-    if err := json.Unmarshal(rawJSON, &cfg); err != nil {
+    if err := json.Unmarshal(jsonConfiguration.Bytes(), &cfg); err != nil {
         panic(err)
     }
     newLogger, _ := cfg.Build()

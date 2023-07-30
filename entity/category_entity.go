@@ -24,6 +24,5 @@ func (entity CategoryEntity) ToString() string {
 	return "[ " +
 		"Id: " + entity.Id.Hex() +
 		", Name: " + entity.Name +
-		", Remark: " + entity.Remark +
 		" ]"
 }

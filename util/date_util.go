@@ -1,6 +1,7 @@
 package util
 
 import (
+	"reflect"
 	"time"
 )
 
@@ -16,4 +17,8 @@ func FormatDateFromString(dateString string) time.Time {
 
 func FormatDateToString(date time.Time) string {
 	return date.Format(defaultDateFormatInString)
+}
+
+func IsDateTimeEmpty(dateTime time.Time) bool {
+	return reflect.DeepEqual(dateTime, time.Time{})
 }

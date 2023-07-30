@@ -3,34 +3,43 @@ package mapper
 import (
 	"github.com/emmettwoo/EMM-MoneyBox/entity"
 	"github.com/emmettwoo/EMM-MoneyBox/mapper/mongodb"
+	"github.com/emmettwoo/EMM-MoneyBox/mapper/mysql"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
 
-var CashFlowTableName = "cash_flow"
+var cashFlowMongoDbMapper CashFlowMapper
+var cashFlowMySqlMapper CashFlowMapper
+var CashFlowCommonMapper CashFlowMapper
 
 type CashFlowMapper interface {
-	GetCashFlowByObjectId(objectId primitive.ObjectID) entity.CashFlowEntity
-	GetCashFlowsByObjectIdArray(objectIdArray []primitive.ObjectID) []entity.CashFlowEntity
+	GetCashFlowByObjectId(plainId string) entity.CashFlowEntity
+	GetCashFlowsByObjectIdArray(plainIdList []string) []entity.CashFlowEntity
 	GetCashFlowsByBelongsDate(belongsDate time.Time) []entity.CashFlowEntity
-	GetCashFlowsByExactDesc(desc string) []entity.CashFlowEntity
-	GetCashFlowsByFuzzyDesc(desc string) []entity.CashFlowEntity
-	InsertCashFlowByEntity(entity entity.CashFlowEntity) primitive.ObjectID
-	UpdateCashFlowByEntity(entity entity.CashFlowEntity) bool
-	DeleteCashFlowByObjectId(objectId primitive.ObjectID) entity.CashFlowEntity
+	GetCashFlowsByCategoryId(categoryPlainId string) []entity.CashFlowEntity
+	GetCashFlowsByCategoryName(categoryName string) []entity.CashFlowEntity
+	GetCashFlowsByExactDesc(description string) []entity.CashFlowEntity
+	GetCashFlowsByFuzzyDesc(description string) []entity.CashFlowEntity
+	CountCashFLowsByCategoryId(categoryPlainId string) int64
+	InsertCashFlowByEntity(newEntity entity.CashFlowEntity) string
+	UpdateCashFlowByEntity(plainId string) entity.CashFlowEntity
+	DeleteCashFlowByObjectId(plainId string) entity.CashFlowEntity
 	DeleteCashFlowByBelongsDate(belongsDate time.Time) []entity.CashFlowEntity
+}
+
+func init() {
+	cashFlowMongoDbMapper = mongodb.CashFlowMongoDbMapper{}
+	cashFlowMySqlMapper = mysql.CashFlowMySqlMapper{}
+	CashFlowCommonMapper = GetCashFlowMapper()
 }
 
 func GetCashFlowMapper() CashFlowMapper {
 
 	switch util.GetConfigByKey("db.type") {
 	case "mongodb":
-		var cashFlowMongoDbMapper CashFlowMapper
-		cashFlowMongoDbMapper = mongodb.CashFlowMongoDbMapper{}
 		return cashFlowMongoDbMapper
 	case "mysql":
-		panic("mysql support is still under dev")
+		return cashFlowMySqlMapper
 	default:
 		panic("database type not supported")
 	}

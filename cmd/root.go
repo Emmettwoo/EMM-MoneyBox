@@ -7,7 +7,7 @@ import (
 )
 
 var cashFlowMapper mapper.CashFlowMapper
-var CategoryMapper mapper.CategoryMapper
+var categoryMapper mapper.CategoryMapper
 
 var rootCmd = &cobra.Command{
 	Use:   "EMM-MoneyBox",
@@ -24,7 +24,7 @@ func Execute() {
 
 func init() {
 	cashFlowMapper = mapper.GetCashFlowMapper()
-	CategoryMapper = mapper.GetCategoryMapper()
+	categoryMapper = mapper.GetCategoryMapper()
 
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
