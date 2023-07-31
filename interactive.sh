@@ -7,26 +7,26 @@ function func_exec_outcome() {
   
   if [ $OUTCOME_AMOUNT > 0 ]; then
     echo "Outcome Amount: $OUTCOME_AMOUNT";
-    EXEC_COMMAND="$EXEC_COMMAND $OUTCOME_AMOUNT";
+    EXEC_COMMAND="$EXEC_COMMAND -a $OUTCOME_AMOUNT";
     
     OUTCOME_TYPE=$(gum input --placeholder "input outcome type here...");
     if [ -z "$OUTCOME_TYPE" ]; then
       OUTCOME_TYPE="unknown";
     fi
     echo "Outcome Type: $OUTCOME_TYPE";
-    EXEC_COMMAND="$EXEC_COMMAND $OUTCOME_TYPE";
+    EXEC_COMMAND="$EXEC_COMMAND -c $OUTCOME_TYPE";
     
     OUTCOME_DATE=$(gum input --placeholder "input outcome date here...");
     if [ -z "$OUTCOME_DATE" ]; then
       OUTCOME_DATE=$(date +%Y%m%d);
     fi
     echo "Outcome Date: $OUTCOME_DATE";
-    EXEC_COMMAND="$EXEC_COMMAND $OUTCOME_DATE";
+    EXEC_COMMAND="$EXEC_COMMAND -b $OUTCOME_DATE";
     
     OUTCOME_REMARK=$(gum input --placeholder "input outcome remark here...");
     echo "Outcome Remark: $OUTCOME_REMARK";
     # Has some problems when there is a blankspace in remark.
-    EXEC_COMMAND="$EXEC_COMMAND '$OUTCOME_REMARK'";
+    EXEC_COMMAND="$EXEC_COMMAND -d '$OUTCOME_REMARK'";
   else
     echo "Error occur...";
     exit -2;
@@ -46,7 +46,7 @@ function func_exec_query() {
     fi
     
     echo "Query Date: $QUERY_DATE";
-    EXEC_COMMAND="$EXEC_COMMAND $QUERY_DATE";
+    EXEC_COMMAND="$EXEC_COMMAND -d $QUERY_DATE";
   else
     echo "Error occur...";
     exit -2;
@@ -63,7 +63,7 @@ function func_exec_delete() {
     DELETE_ID=$(gum input --placeholder "input object id here...");
     echo "Delete Id: $DELETE_ID";
     if [ -n "$DELETE_ID" ]; then
-      EXEC_COMMAND="$EXEC_COMMAND $DELETE_ID";
+      EXEC_COMMAND="$EXEC_COMMAND -i $DELETE_ID";
     fi
   else
     echo "Error occur...";
@@ -83,13 +83,13 @@ EXEC_TYPE=$(gum choose "outcome" "query" "delete");
 echo "Operation Type: $EXEC_TYPE";
 
 if [ $EXEC_TYPE = "outcome" ]; then
-  EXEC_COMMAND="go run main.go outcome";
+  EXEC_COMMAND="go run main.go cash outcome";
   func_exec_outcome;
 elif [ $EXEC_TYPE = "query" ]; then
-  EXEC_COMMAND="go run main.go query";
+  EXEC_COMMAND="go run main.go cash query";
   func_exec_query;
 elif [ $EXEC_TYPE = "delete" ]; then
-  EXEC_COMMAND="go run main.go delete";
+  EXEC_COMMAND="go run main.go cash delete";
   func_exec_delete;
 else
   echo "Error occur...";
