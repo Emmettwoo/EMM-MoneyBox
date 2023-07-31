@@ -46,7 +46,7 @@ function func_exec_query() {
     fi
     
     echo "Query Date: $QUERY_DATE";
-    EXEC_COMMAND="$EXEC_COMMAND -d $QUERY_DATE";
+    EXEC_COMMAND="$EXEC_COMMAND -b $QUERY_DATE";
   else
     echo "Error occur...";
     exit -2;
