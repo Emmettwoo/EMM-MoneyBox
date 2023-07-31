@@ -159,23 +159,25 @@ func isRequiredFieldSatisfied(currentRowNumber int, columnCellMap map[string]str
 func handleCategoryInfo(categoryId string, categoryName string) string {
 
 	// use category id to fetch first
-	var categoryEntity = mapper.CategoryCommonMapper.GetCategoryByObjectId(categoryId)
-	if !categoryEntity.IsEmpty() {
-		return categoryEntity.Id.Hex()
+	if categoryId != "" {
+		var categoryEntity = mapper.CategoryCommonMapper.GetCategoryByObjectId(categoryId)
+		if !categoryEntity.IsEmpty() {
+			return categoryEntity.Id.Hex()
+		}
+		util.Logger.Warnw("category not existed", "category_id", categoryId)
 	}
-	util.Logger.Warnw("category id not existed", "category_id", categoryId)
-
-	// use category name to fetch correct id
-	categoryEntity = mapper.CategoryCommonMapper.GetCategoryByName(categoryName)
-	if !categoryEntity.IsEmpty() {
-		return categoryEntity.Id.Hex()
-	}
-	util.Logger.Warnw("category name not existed", "category_name", categoryName)
 
 	// if category name is empty, fail it.
 	if categoryName == "" {
 		return ""
 	}
+
+	// use category name to fetch correct id
+	categoryEntity := mapper.CategoryCommonMapper.GetCategoryByName(categoryName)
+	if !categoryEntity.IsEmpty() {
+		return categoryEntity.Id.Hex()
+	}
+	util.Logger.Warnw("category not existed", "category_name", categoryName)
 
 	// create new category for this flow
 	var plainId = mapper.CategoryCommonMapper.InsertCategoryByEntity(entity.CategoryEntity{
@@ -200,7 +202,8 @@ func saveIntoDB(cashFlowMapByColumnList []map[string]string) {
 				continue
 			}
 		}
-		mapper.CashFlowCommonMapper.InsertCashFlowByEntity(cashFlowEntity)
+		var newPlainId = mapper.CashFlowCommonMapper.InsertCashFlowByEntity(cashFlowEntity)
+		cashFlowEntity.Id = util.Convert2ObjectId(newPlainId)
 		util.Logger.Debug("cash_flow inserted: " + cashFlowEntity.ToString())
 		fmt.Println("succeed: row " + cashFlowMapByColumn[sheetRowNumberLabel] + ": cash_flow saved")
 		importSucceedRowNumberList = append(importSucceedRowNumberList,
