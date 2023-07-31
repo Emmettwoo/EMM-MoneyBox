@@ -29,7 +29,7 @@ func OutcomeService(belongsDate string, categoryName string, amount float64, des
 	// 選填參數: 日期（默認當天）
 	date := util.FormatDateFromString(util.FormatDateToString(time.Now()))
 	if belongsDate != "" {
-		util.FormatDateFromString(belongsDate)
+		date = util.FormatDateFromString(belongsDate)
 	}
 
 	newCashFlowId := mapper.CashFlowCommonMapper.InsertCashFlowByEntity(entity.CashFlowEntity{
