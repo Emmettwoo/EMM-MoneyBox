@@ -54,8 +54,15 @@ func initConsoleLogger() *zap.Logger {
 }
 
 func createLogFile() *os.File {
-	// 創建 log 文件，您可以自行更改文件路徑和名稱
-	file, err := os.Create("./emm-moneybox.log")
+
+	var logFilePath = GetConfigByKey("logger.file")
+	if logFilePath == "" {
+		logFilePath = "./emm-moneybox.log"
+	}
+
+	// create a log file, open it if already exist.
+	// file, err := os.OpenFile(logFilePath, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0)
+	file, err := os.Create(logFilePath)
 	if err != nil {
 		log.Fatal("failed to create log file: ", err)
 	}

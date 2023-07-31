@@ -10,7 +10,7 @@ func init() {
 }
 
 func initDefaultValues() {
-	configurationMap["logger.level"] = "debug"
+	configurationMap["logger.file"] = "./emm-moneybox.log"
 	configurationMap["db.name"] = "emm_moneybox"
 	// format: mongodb / mysql
 	configurationMap["db.type"] = "mongodb"
