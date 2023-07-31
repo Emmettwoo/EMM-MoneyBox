@@ -1,75 +1,63 @@
 package util
 
 import (
-    "bytes"
-    "encoding/json"
-    "go.uber.org/zap"
-    "go.uber.org/zap/zapcore"
-    "os"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"log"
+	"os"
 )
 
 var consoleLogger *zap.Logger
-var fileLogger *zap.Logger
 var sugaredConsoleLogger *zap.SugaredLogger
 var Logger = getLogger()
-var FileLogger *zap.Logger
 
 func initLogger() {
-    if consoleLogger == nil {
-        consoleLogger = initConsoleLogger()
-    }
-    if sugaredConsoleLogger == nil {
-        sugaredConsoleLogger = consoleLogger.Sugar()
-    }
-    if fileLogger == nil {
-        fileLogger = initFileLogger()
-        FileLogger = fileLogger
-    }
+	if consoleLogger == nil {
+		consoleLogger = initConsoleLogger()
+	}
+	if sugaredConsoleLogger == nil {
+		sugaredConsoleLogger = consoleLogger.Sugar()
+	}
 
-    consoleLogger.Debug("loggers initialize succeed")
+	consoleLogger.Debug("loggers initialize succeed")
 }
 
 func getLogger() *zap.SugaredLogger {
-    if sugaredConsoleLogger == nil {
-        initLogger()
-    }
-    return sugaredConsoleLogger
-}
-
-func initFileLogger() *zap.Logger {
-    encoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
-    file, _ := os.Create("./emm-moneybox.log")
-    writerSyncer := zapcore.NewMultiWriteSyncer(file)
-    core := zapcore.NewCore(encoder, writerSyncer, zapcore.DebugLevel)
-    newLogger := zap.New(core)
-    return newLogger
+	if sugaredConsoleLogger == nil {
+		initLogger()
+	}
+	return sugaredConsoleLogger
 }
 
 func initConsoleLogger() *zap.Logger {
-	
-    // newLogger, _ := zap.NewProduction()
-    var loggerLevel = GetConfigByKey("logger.level")
-    if loggerLevel == "" {
-        loggerLevel = "info"
-    }
 
-    var jsonConfiguration bytes.Buffer
-    jsonConfiguration.WriteString(`{`)
-    jsonConfiguration.WriteString(`  "level": "` + loggerLevel + `",`)
-    jsonConfiguration.WriteString(`  "encoding": "json",`)
-    jsonConfiguration.WriteString(`  "outputPaths": ["stdout"],`)
-    jsonConfiguration.WriteString(`  "errorOutputPaths": ["stderr"],`)
-    jsonConfiguration.WriteString(`  "encoderConfig": {`)
-    jsonConfiguration.WriteString(`    "messageKey": "message",`)
-    jsonConfiguration.WriteString(`    "levelKey": "level",`)
-    jsonConfiguration.WriteString(`    "levelEncoder": "lowercase"`)
-    jsonConfiguration.WriteString(`  }`)
-    jsonConfiguration.WriteString(`}`)
+	// 設定 console 輸出
+	consoleOutput := zapcore.Lock(os.Stdout)
+	// 設定 file 輸出
+	fileOutput := zapcore.Lock(zapcore.AddSync(createLogFile()))
 
-    var cfg zap.Config
-    if err := json.Unmarshal(jsonConfiguration.Bytes(), &cfg); err != nil {
-        panic(err)
-    }
-    newLogger, _ := cfg.Build()
-    return newLogger
+	// 設定日誌等級
+	consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
+	fileEncoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
+
+	// 合併輸出和編碼器
+	consoleCore := zapcore.NewCore(consoleEncoder, consoleOutput, zapcore.DebugLevel)
+	fileCore := zapcore.NewCore(fileEncoder, fileOutput, zapcore.InfoLevel)
+
+	// 同時使用 console 和 file 輸出
+	logger := zap.New(zapcore.NewTee(consoleCore, fileCore), zap.AddCaller())
+
+	// 記得在程序結束時關閉 logger
+	// defer consoleLogger.Sync()
+
+	return logger
+}
+
+func createLogFile() *os.File {
+	// 創建 log 文件，您可以自行更改文件路徑和名稱
+	file, err := os.Create("./emm-moneybox.log")
+	if err != nil {
+		log.Fatal("failed to create log file: ", err)
+	}
+	return file
 }
