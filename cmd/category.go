@@ -14,7 +14,7 @@ var queryCmd4Category = &cobra.Command{
 	Use:   "query",
 	Short: "query for category data",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return category_service.QueryService(plainId4Category, categoryName4Category)
+		return category_service.QueryService(plainId4Category, parentPlainId4Category, categoryName4Category)
 	},
 }
 
@@ -51,6 +51,8 @@ func init() {
 	// add sub-command: query
 	queryCmd4Category.Flags().StringVarP(
 		&plainId4Category, "id", "i", "", "query by id")
+	queryCmd4Category.Flags().StringVarP(
+		&parentPlainId4Category, "parent", "p", "", "query by parent id")
 	queryCmd4Category.Flags().StringVarP(
 		&categoryName4Category, "name", "n", "", "query by name")
 	categoryCmd.AddCommand(queryCmd4Category)

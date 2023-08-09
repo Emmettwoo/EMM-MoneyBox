@@ -74,12 +74,12 @@ func isQueryFieldsConflicted(plainId string, belongsDate string, exactDescriptio
 
 func queryById(plainId string) {
 
-	cashFlow := mapper.CashFlowCommonMapper.GetCashFlowByObjectId(plainId)
-	if cashFlow.IsEmpty() {
+	cashFlowEntity := mapper.CashFlowCommonMapper.GetCashFlowByObjectId(plainId)
+	if cashFlowEntity.IsEmpty() {
 		fmt.Println("cash_flow not found")
 		return
 	}
-	fmt.Println("cash_flow ", 0, ": ", cashFlow.ToString())
+	fmt.Println("cash_flow ", 0, ": ", cashFlowEntity.ToString())
 }
 
 func queryByDate(belongsDate string) error {
@@ -89,40 +89,40 @@ func queryByDate(belongsDate string) error {
 		return errors.New("belongs_date error, try format like 19700101")
 	}
 
-	cashFlowList := mapper.CashFlowCommonMapper.GetCashFlowsByBelongsDate(queryDate)
-	if len(cashFlowList) == 0 {
+	matchedCashFlowList := mapper.CashFlowCommonMapper.GetCashFlowsByBelongsDate(queryDate)
+	if len(matchedCashFlowList) == 0 {
 		fmt.Println("the day's flow is empty")
 		return nil
 	}
 
-	for index, cashFlow := range cashFlowList {
-		fmt.Println("cash_flow ", index, ": ", cashFlow.ToString())
+	for index, cashFlowEntity := range matchedCashFlowList {
+		fmt.Println("cash_flow ", index, ": ", cashFlowEntity.ToString())
 	}
 	return nil
 }
 
 func queryByExactDescription(exactDescription string) {
 
-	matchedCashFlow := mapper.CashFlowCommonMapper.GetCashFlowsByExactDesc(exactDescription)
-	if len(matchedCashFlow) == 0 {
+	matchedCashFlowList := mapper.CashFlowCommonMapper.GetCashFlowsByExactDesc(exactDescription)
+	if len(matchedCashFlowList) == 0 {
 		fmt.Println("no matched cash_flows")
 		return
 	}
 
-	for index, cashFlow := range matchedCashFlow {
-		fmt.Println("cash_flow ", index, ": ", cashFlow.ToString())
+	for index, cashFlowEntity := range matchedCashFlowList {
+		fmt.Println("cash_flow ", index, ": ", cashFlowEntity.ToString())
 	}
 }
 
 func queryByFuzzyDescription(fuzzyDescription string) {
 
-	matchedCashFlow := mapper.CashFlowCommonMapper.GetCashFlowsByFuzzyDesc(fuzzyDescription)
-	if len(matchedCashFlow) == 0 {
+	matchedCashFlowList := mapper.CashFlowCommonMapper.GetCashFlowsByFuzzyDesc(fuzzyDescription)
+	if len(matchedCashFlowList) == 0 {
 		fmt.Println("no matched cash_flows")
 		return
 	}
 
-	for index, cashFlow := range matchedCashFlow {
-		fmt.Println("cash_flow ", index, ": ", cashFlow.ToString())
+	for index, cashFlowEntity := range matchedCashFlowList {
+		fmt.Println("cash_flow ", index, ": ", cashFlowEntity.ToString())
 	}
 }

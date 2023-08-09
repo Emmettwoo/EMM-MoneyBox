@@ -14,6 +14,7 @@ var CategoryCommonMapper CategoryMapper
 type CategoryMapper interface {
 	GetCategoryByObjectId(plainId string) entity.CategoryEntity
 	GetCategoryByName(categoryName string) entity.CategoryEntity
+	GetCategoryByParentId(parentPlainId string) []entity.CategoryEntity
 	InsertCategoryByEntity(newEntity entity.CategoryEntity) string
 	UpdateCategoryByEntity(plainId string) entity.CategoryEntity
 	DeleteCategoryByObjectId(plainId string) entity.CategoryEntity

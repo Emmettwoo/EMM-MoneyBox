@@ -156,7 +156,7 @@ func (CashFlowMongoDbMapper) GetCashFlowsByFuzzyDesc(description string) []entit
 		}},
 	}
 
-	// 打开cashFlow的数据表连线
+	// 打开 cash_flow 的数据表连线
 	database.OpenMongoDbConnection(database.CashFlowTableName)
 	defer database.CloseMongoDbConnection()
 
@@ -204,10 +204,12 @@ func (CashFlowMongoDbMapper) UpdateCashFlowByEntity(plainId string) entity.CashF
 	}
 
 	// todo: update specific fields by passing params (category_name, belongs_date, flow_type, amount, description)
-
 	targetEntity.ModifyTime = time.Now()
-	if database.UpdateManyInMongoDB(filter, convertCashFlowEntity2BsonD(targetEntity)) == 0 {
-		util.Logger.Errorln("cash_flow update failed")
+
+	var rowsAffected = database.UpdateManyInMongoDB(filter, convertCashFlowEntity2BsonD(targetEntity))
+	if rowsAffected != 1 {
+		// fixme: maybe we should have a rollback here.
+		util.Logger.Errorw("update failed", "rows_affected", rowsAffected)
 		return entity.CashFlowEntity{}
 	}
 
@@ -233,8 +235,10 @@ func (CashFlowMongoDbMapper) DeleteCashFlowByObjectId(plainId string) entity.Cas
 		util.Logger.Infoln("cash_flow is not exist")
 		return entity.CashFlowEntity{}
 	}
-	if database.DeleteManyInMongoDB(filter) == 0 {
-		util.Logger.Errorln("cash_flow delete failed")
+	var rowsAffected = database.DeleteManyInMongoDB(filter)
+	if rowsAffected != 1 {
+		// fixme: maybe we should have a rollback here.
+		util.Logger.Errorw("delete failed", "rows_affected", rowsAffected)
 		return entity.CashFlowEntity{}
 	}
 	return targetEntity
@@ -245,11 +249,21 @@ func (CashFlowMongoDbMapper) DeleteCashFlowByBelongsDate(belongsDate time.Time) 
 	filter := bson.D{
 		primitive.E{Key: "belongs_date", Value: belongsDate},
 	}
+
 	var cashFlowList = cashFlowMongoDbMapper.GetCashFlowsByBelongsDate(belongsDate)
+	if cashFlowList == nil {
+		util.Logger.Infoln("no cash_flow(s) found")
+		return cashFlowList
+	}
 
 	database.OpenMongoDbConnection(database.CashFlowTableName)
 	defer database.CloseMongoDbConnection()
-	database.DeleteManyInMongoDB(filter)
+
+	var rowsAffected = database.DeleteManyInMongoDB(filter)
+	if rowsAffected != int64(len(cashFlowList)) {
+		// fixme: maybe we should have a rollback here.
+		util.Logger.Errorw("delete failed", "rows_affected", rowsAffected)
+	}
 	return cashFlowList
 }
 

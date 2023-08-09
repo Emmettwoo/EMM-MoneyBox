@@ -13,7 +13,7 @@ func initDefaultValues() {
 	configurationMap["logger.file"] = "./emm-moneybox.log"
 	configurationMap["db.name"] = "emm_moneybox"
 	// format: mongodb / mysql
-	configurationMap["db.type"] = "mongodb"
+	configurationMap["db.type"] = "mysql"
 	// format: mongodb+srv://
 	configurationMap["db.mongodb.url"] = os.Getenv("MONGO_DB_URI")
 	// format: user:password@tcp(host:port)

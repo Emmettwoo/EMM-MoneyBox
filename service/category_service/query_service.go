@@ -6,14 +6,19 @@ import (
 	"github.com/emmettwoo/EMM-MoneyBox/mapper"
 )
 
-func QueryService(plainId, categoryName string) error {
+func QueryService(plainId, parentPlainId, categoryName string) error {
 
-	if isQueryFieldsConflicted(plainId, categoryName) {
+	if isQueryFieldsConflicted(plainId, parentPlainId, categoryName) {
 		return errors.New("should have one and only one query type")
 	}
 
 	if plainId != "" {
 		queryById(plainId)
+		return nil
+	}
+
+	if parentPlainId != "" {
+		queryByParentId(parentPlainId)
 		return nil
 	}
 
@@ -25,13 +30,21 @@ func QueryService(plainId, categoryName string) error {
 	return errors.New("not supported query type")
 }
 
-func isQueryFieldsConflicted(plainId, name string) bool {
+func isQueryFieldsConflicted(plainId, parentPlainId, name string) bool {
 
 	// check if already one semi-optional field is filled
 	var semiOptionalFieldFilledFlag = false
 
 	// plain_id is not empty
 	if plainId != "" {
+		semiOptionalFieldFilledFlag = true
+	}
+
+	// parent_plain_id is not empty
+	if parentPlainId != "" {
+		if semiOptionalFieldFilledFlag {
+			return true
+		}
 		semiOptionalFieldFilledFlag = true
 	}
 
@@ -55,6 +68,19 @@ func queryById(plainId string) {
 		return
 	}
 	fmt.Println("category ", 0, ": ", categoryEntity.ToString())
+}
+
+func queryByParentId(plainParentId string) {
+
+	matchedCategoryList := mapper.CategoryCommonMapper.GetCategoryByParentId(plainParentId)
+	if len(matchedCategoryList) == 0 {
+		fmt.Println("no matched categories")
+		return
+	}
+
+	for index, categoryEntity := range matchedCategoryList {
+		fmt.Println("category ", index, ": ", categoryEntity.ToString())
+	}
 }
 
 func queryByName(categoryName string) {

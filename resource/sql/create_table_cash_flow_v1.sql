@@ -6,9 +6,9 @@ USE `emm_moneybox`;
 DROP TABLE IF EXISTS cash_flow;
 CREATE TABLE `cash_flow`
 (
-    `id`           VARCHAR(20)  NOT NULL,
-    `category_id`  VARCHAR(20)  NOT NULL,
-    `belongs_date` DATE         NOT NULL,
+    `id`           VARCHAR(24)  NOT NULL,
+    `category_id`  VARCHAR(24)  NOT NULL,
+    `belongs_date` TIMESTAMP    NOT NULL,
     `flow_type`    VARCHAR(10)  NOT NULL COMMENT 'INCOME/OUTCOME',
     `amount`       DECIMAL      NOT NULL,
     `description`  VARCHAR(200) NOT NULL,

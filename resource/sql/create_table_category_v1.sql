@@ -7,8 +7,8 @@ USE
 DROP TABLE IF EXISTS category;
 CREATE TABLE `category`
 (
-    `id`          VARCHAR(20)  NOT NULL,
-    `parent_id`   VARCHAR(20)           DEFAULT NULL,
+    `id`          VARCHAR(24)  NOT NULL,
+    `parent_id`   VARCHAR(24)           DEFAULT NULL,
     `name`        VARCHAR(200) NOT NULL,
     `remark`      VARCHAR(200)          DEFAULT NULL,
     `create_time` TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP(),

@@ -6,9 +6,18 @@ import (
 )
 
 var defaultDateFormatInString = "20060102"
+var dateFormatInStringWithDash = "2006-01-02"
 
 func FormatDateFromString(dateString string) time.Time {
-	date, err := time.Parse(defaultDateFormatInString, dateString)
+	return formatDateFromString(dateString, defaultDateFormatInString)
+}
+
+func FormatDateFromStringWithDash(dateString string) time.Time {
+	return formatDateFromString(dateString, dateFormatInStringWithDash)
+}
+
+func formatDateFromString(dateString, format string) time.Time {
+	date, err := time.Parse(format, dateString)
 	if err != nil {
 		Logger.Errorln(err)
 	}
@@ -16,7 +25,15 @@ func FormatDateFromString(dateString string) time.Time {
 }
 
 func FormatDateToString(date time.Time) string {
-	return date.Format(defaultDateFormatInString)
+	return formatDateToString(date, defaultDateFormatInString)
+}
+
+func FormatDateToStringWithDash(date time.Time) string {
+	return formatDateToString(date, dateFormatInStringWithDash)
+}
+
+func formatDateToString(date time.Time, format string) string {
+	return date.Format(format)
 }
 
 func IsDateTimeEmpty(dateTime time.Time) bool {

@@ -41,6 +41,24 @@ func (CategoryMongoDbMapper) GetCategoryByName(categoryName string) entity.Categ
 	return convertBsonM2CategoryEntity(database.GetOneInMongoDB(filter))
 }
 
+func (CategoryMongoDbMapper) GetCategoryByParentId(parentPlainId string) []entity.CategoryEntity {
+
+	filter := bson.D{
+		primitive.E{Key: "parent_id", Value: parentPlainId},
+	}
+
+	database.OpenMongoDbConnection(database.CategoryTableName)
+	defer database.CloseMongoDbConnection()
+
+	var targetEntityList []entity.CategoryEntity
+	queryResultList := database.GetManyInMongoDB(filter)
+	for _, queryResult := range queryResultList {
+		targetEntityList = append(targetEntityList, convertBsonM2CategoryEntity(queryResult))
+	}
+
+	return targetEntityList
+}
+
 func (CategoryMongoDbMapper) InsertCategoryByEntity(newEntity entity.CategoryEntity) string {
 
 	var operatingTime = time.Now()
@@ -76,10 +94,12 @@ func (CategoryMongoDbMapper) UpdateCategoryByEntity(plainId string) entity.Categ
 	}
 
 	// todo: update specific fields by passing params (parentId, name)
-
 	targetEntity.ModifyTime = time.Now()
-	if database.UpdateManyInMongoDB(filter, convertCategoryEntity2BsonD(targetEntity)) == 0 {
-		util.Logger.Errorln("category update failed")
+
+	var rowsAffected = database.UpdateManyInMongoDB(filter, convertCategoryEntity2BsonD(targetEntity))
+	if rowsAffected != 1 {
+		// fixme: maybe we should have a rollback here.
+		util.Logger.Errorw("update failed", "rows_affected", rowsAffected)
 		return entity.CategoryEntity{}
 	}
 
@@ -107,14 +127,22 @@ func (CategoryMongoDbMapper) DeleteCategoryByObjectId(plainId string) entity.Cat
 		return entity.CategoryEntity{}
 	}
 
-	// can not delete a category that has refer cash_flow(s).
-	if len(cashFlowMongoDbMapper.GetCashFlowsByCategoryId(targetEntity.Id.Hex())) != 0 {
+	// can not delete a category that has referred cash_flows.
+	if cashFlowMongoDbMapper.CountCashFLowsByCategoryId(targetEntity.Id.Hex()) != 0 {
 		util.Logger.Infoln("can not delete a category which has cash_flows refer to")
 		return entity.CategoryEntity{}
 	}
 
-	if database.DeleteManyInMongoDB(filter) == 0 {
-		util.Logger.Errorln("category delete failed")
+	// can not delete a category that has referred child-categories.
+	if len(categoryMongoDbMapper.GetCategoryByParentId(plainId)) != 0 {
+		util.Logger.Infoln("can not delete a category which has child-categories refer to")
+		return entity.CategoryEntity{}
+	}
+
+	var rowsAffected = database.DeleteManyInMongoDB(filter)
+	if rowsAffected != 1 {
+		// fixme: maybe we should have a rollback here.
+		util.Logger.Errorw("delete failed", "rows_affected", rowsAffected)
 		return entity.CategoryEntity{}
 	}
 	return targetEntity
