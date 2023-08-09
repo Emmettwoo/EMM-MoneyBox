@@ -3,13 +3,14 @@ package manage_service
 import (
 	"errors"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/emmettwoo/EMM-MoneyBox/entity"
 	"github.com/emmettwoo/EMM-MoneyBox/mapper"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/xuri/excelize/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"strconv"
-	"time"
 )
 
 var sheetRowNumberLabel = "row_num"
@@ -156,7 +157,7 @@ func isRequiredFieldSatisfied(currentRowNumber int, columnCellMap map[string]str
 	return true
 }
 
-func handleCategoryInfo(categoryId string, categoryName string) string {
+func handleCategoryInfo(categoryId, categoryName string) string {
 
 	// use category id to fetch first
 	if categoryId != "" {

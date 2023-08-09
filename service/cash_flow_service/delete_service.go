@@ -3,13 +3,14 @@ package cash_flow_service
 import (
 	"errors"
 	"fmt"
-	"github.com/emmettwoo/EMM-MoneyBox/mapper"
-	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"reflect"
 	"time"
+
+	"github.com/emmettwoo/EMM-MoneyBox/mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/util"
 )
 
-func DeleteService(plainId string, belongsDate string) error {
+func DeleteService(plainId, belongsDate string) error {
 
 	if isDeleteFieldsConflicted(plainId, belongsDate) {
 		return errors.New("should have one and only one delete type")
@@ -26,7 +27,7 @@ func DeleteService(plainId string, belongsDate string) error {
 	return errors.New("not supported delete type")
 }
 
-func isDeleteFieldsConflicted(plainId string, belongsDate string) bool {
+func isDeleteFieldsConflicted(plainId, belongsDate string) bool {
 
 	// check if already one semi-optional field is filled
 	var semiOptionalFieldFilledFlag = false

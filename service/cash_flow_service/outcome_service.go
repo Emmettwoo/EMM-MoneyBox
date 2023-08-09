@@ -3,14 +3,15 @@ package cash_flow_service
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/emmettwoo/EMM-MoneyBox/entity"
 	"github.com/emmettwoo/EMM-MoneyBox/mapper"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/shopspring/decimal"
-	"time"
 )
 
-func OutcomeService(belongsDate string, categoryName string, amount float64, description string) error {
+func OutcomeService(belongsDate, categoryName string, amount float64, description string) error {
 
 	if !isOutcomeRequiredFiledSatisfied(categoryName, amount) {
 		return errors.New("some required fields are empty")

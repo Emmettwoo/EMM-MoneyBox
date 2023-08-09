@@ -2,10 +2,11 @@ package database
 
 import (
 	"database/sql"
-	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"log"
 	"reflect"
 	"time"
+
+	"github.com/emmettwoo/EMM-MoneyBox/util"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -46,7 +47,7 @@ func openMySqlConnection() {
 func CloseMySqlConnection() {
 
 	// do nothing if not connected
-	if isConnected == false || reflect.DeepEqual(connection, sql.DB{}) {
+	if !isConnected || reflect.DeepEqual(connection, sql.DB{}) {
 		isConnected = false
 		return
 	}

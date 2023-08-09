@@ -3,6 +3,7 @@ package category_service
 import (
 	"errors"
 	"fmt"
+
 	"github.com/emmettwoo/EMM-MoneyBox/entity"
 	"github.com/emmettwoo/EMM-MoneyBox/mapper"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
@@ -35,9 +36,5 @@ func CreateService(parentPlainId, categoryName string) error {
 
 func isCreateRequiredFiledSatisfied(categoryName string) bool {
 
-	if categoryName == "" {
-		return false
-	}
-
-	return true
+	return categoryName != ""
 }

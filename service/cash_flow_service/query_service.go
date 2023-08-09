@@ -3,13 +3,14 @@ package cash_flow_service
 import (
 	"errors"
 	"fmt"
-	"github.com/emmettwoo/EMM-MoneyBox/mapper"
-	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"reflect"
 	"time"
+
+	"github.com/emmettwoo/EMM-MoneyBox/mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/util"
 )
 
-func QueryService(plainId string, belongsDate string, exactDescription string, fuzzyDescription string) error {
+func QueryService(plainId, belongsDate, exactDescription, fuzzyDescription string) error {
 
 	if isQueryFieldsConflicted(plainId, belongsDate, exactDescription, fuzzyDescription) {
 		return errors.New("should have one and only one query type")
@@ -34,7 +35,7 @@ func QueryService(plainId string, belongsDate string, exactDescription string, f
 	return errors.New("not supported query type")
 }
 
-func isQueryFieldsConflicted(plainId string, belongsDate string, exactDescription string, fuzzyDescription string) bool {
+func isQueryFieldsConflicted(plainId, belongsDate, exactDescription, fuzzyDescription string) bool {
 
 	// check if already one semi-optional field is filled
 	var semiOptionalFieldFilledFlag = false
