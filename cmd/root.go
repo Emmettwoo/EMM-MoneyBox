@@ -2,12 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/emmettwoo/EMM-MoneyBox/mapper"
 	"github.com/spf13/cobra"
 )
-
-var cashFlowMapper mapper.CashFlowMapper
-var categoryMapper mapper.CategoryMapper
 
 var rootCmd = &cobra.Command{
 	Use:   "EMM-MoneyBox",
@@ -23,8 +19,5 @@ func Execute() {
 }
 
 func init() {
-	cashFlowMapper = mapper.GetCashFlowMapper()
-	categoryMapper = mapper.GetCategoryMapper()
-
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
