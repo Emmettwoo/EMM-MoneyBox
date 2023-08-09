@@ -66,7 +66,7 @@ func deleteById(plainId string) error {
 
 func deleteByDate(belongsDate string) error {
 
-	var deleteDate = util.FormatDateFromString(belongsDate)
+	var deleteDate = util.FormatDateFromStringWithoutDash(belongsDate)
 	if reflect.DeepEqual(deleteDate, time.Time{}) {
 		return errors.New("belongs_date error, try format like 19700101")
 	}

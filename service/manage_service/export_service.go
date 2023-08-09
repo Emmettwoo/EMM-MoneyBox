@@ -18,8 +18,8 @@ func ExportService(fromDateInString string, toDateInString string, filePath stri
 	if filePath == "" {
 		filePath = "./export.xlsx"
 	}
-	var fromDate = util.FormatDateFromString(fromDateInString)
-	var toDate = util.FormatDateFromString(toDateInString)
+	var fromDate = util.FormatDateFromStringWithoutDash(fromDateInString)
+	var toDate = util.FormatDateFromStringWithoutDash(toDateInString)
 	if err := isExportRequiredFiledSatisfied(fromDate, toDate, filePath); err != nil {
 		return err
 	}
@@ -79,21 +79,21 @@ func exportData(file *excelize.File, fromDate, toDate string) {
 
 	var cashFlowRowIndex = 1
 
-	var queryDateCurrent = util.FormatDateFromString(fromDate)
+	var queryDateCurrent = util.FormatDateFromStringWithoutDash(fromDate)
 	// add one day for include the last day's data
-	var queryDateEnded = util.FormatDateFromString(toDate).AddDate(0, 0, 1)
+	var queryDateEnded = util.FormatDateFromStringWithoutDash(toDate).AddDate(0, 0, 1)
 
 	var currentYearAndMonth = "nil"
 
 	for queryDateEnded.After(queryDateCurrent) {
 		cashFlowArray := mapper.CashFlowCommonMapper.GetCashFlowsByBelongsDate(queryDateCurrent)
 		if len(cashFlowArray) == 0 {
-			util.Logger.Debugf("%s's flow is empty.\n", util.FormatDateToString(queryDateCurrent))
+			util.Logger.Debugf("%s's flow is empty.\n", util.FormatDateToStringWithoutDash(queryDateCurrent))
 			queryDateCurrent = queryDateCurrent.AddDate(0, 0, 1)
 			continue
 		}
 
-		var queryDateCurrentInString = util.FormatDateToString(queryDateCurrent)
+		var queryDateCurrentInString = util.FormatDateToStringWithoutDash(queryDateCurrent)
 		util.Logger.Debugf("%s's flow is exporting.\n", queryDateCurrentInString)
 
 		// 年份有變化，則初始化新 Sheet

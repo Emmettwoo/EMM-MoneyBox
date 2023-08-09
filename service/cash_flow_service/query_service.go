@@ -84,7 +84,7 @@ func queryById(plainId string) {
 
 func queryByDate(belongsDate string) error {
 
-	var queryDate = util.FormatDateFromString(belongsDate)
+	var queryDate = util.FormatDateFromStringWithoutDash(belongsDate)
 	if reflect.DeepEqual(queryDate, time.Time{}) {
 		return errors.New("belongs_date error, try format like 19700101")
 	}

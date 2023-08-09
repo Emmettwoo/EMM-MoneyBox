@@ -8,7 +8,7 @@ import (
 var defaultDateFormatInString = "20060102"
 var dateFormatInStringWithDash = "2006-01-02"
 
-func FormatDateFromString(dateString string) time.Time {
+func FormatDateFromStringWithoutDash(dateString string) time.Time {
 	return formatDateFromString(dateString, defaultDateFormatInString)
 }
 
@@ -24,7 +24,7 @@ func formatDateFromString(dateString, format string) time.Time {
 	return date
 }
 
-func FormatDateToString(date time.Time) string {
+func FormatDateToStringWithoutDash(date time.Time) string {
 	return formatDateToString(date, defaultDateFormatInString)
 }
 

@@ -32,7 +32,7 @@ func (entity CashFlowEntity) ToString() string {
 		"Id: " + entity.Id.Hex() +
 		// fixme: using mapper to fetch category name?
 		// ", Category: " + mapper.GetCategoryMapper().GetCategoryByObjectId(entity.CategoryId.Hex()).Name +
-		", Date: " + util.FormatDateToString(entity.BelongsDate) +
+		", Date: " + util.FormatDateToStringWithoutDash(entity.BelongsDate) +
 		", FlowType: " + entity.FlowType +
 		", Amount: " + strconv.FormatFloat(entity.Amount, 'f', 2, 64) +
 		", Description: " + entity.Description +
@@ -52,7 +52,7 @@ func (entity CashFlowEntity) Build(fieldMap map[string]string) CashFlowEntity {
 		case "CategoryId":
 			newEntity.CategoryId = util.Convert2ObjectId(value)
 		case "BelongsDate":
-			newEntity.BelongsDate = util.FormatDateFromString(value)
+			newEntity.BelongsDate = util.FormatDateFromStringWithoutDash(value)
 		case "FlowType":
 			// todo: use enum to check if value available
 			newEntity.FlowType = value

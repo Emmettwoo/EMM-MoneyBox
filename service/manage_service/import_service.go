@@ -54,7 +54,7 @@ func ImportService(filePath string) error {
 		// fixme: 保存 cashFlowList 時，要考慮事務細粒度，考慮增加 batchInsert()
 		for date, cashFlowMapByColumnList := range cashFlowMapByDate {
 			saveIntoDB(cashFlowMapByColumnList)
-			util.Logger.Debugf("%s of %s's flows imported", util.FormatDateToString(date), currentSheetName)
+			util.Logger.Debugf("%s of %s's flows imported", util.FormatDateToStringWithoutDash(date), currentSheetName)
 		}
 		util.Logger.Infow("sheet has been imported",
 			"sheet_name", currentSheetName,
@@ -124,7 +124,7 @@ func readSheetData(sheetRowCursor *excelize.Rows) map[time.Time][]map[string]str
 			continue
 		}
 
-		var cashFlowDate = util.FormatDateFromString(cashFlowMapByColumn["BelongsDate"])
+		var cashFlowDate = util.FormatDateFromStringWithoutDash(cashFlowMapByColumn["BelongsDate"])
 		cashFlowMapByDate[cashFlowDate] = append(cashFlowMapByDate[cashFlowDate], cashFlowMapByColumn)
 	}
 
