@@ -3,13 +3,14 @@ package database
 import (
 	"context"
 	"errors"
+	"log"
+	"reflect"
+
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
-	"reflect"
 )
 
 var client *mongo.Client
@@ -41,7 +42,7 @@ func OpenMongoDbConnection(collectionName string) {
 func CloseMongoDbConnection() {
 
 	// do nothing if not connected
-	if isConnected == false || reflect.DeepEqual(client, mongo.Client{}) {
+	if !isConnected || reflect.DeepEqual(client, mongo.Client{}) {
 		isConnected = false
 		return
 	}

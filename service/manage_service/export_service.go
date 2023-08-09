@@ -2,18 +2,19 @@ package manage_service
 
 import (
 	"errors"
-	"github.com/emmettwoo/EMM-MoneyBox/mapper"
-	"github.com/emmettwoo/EMM-MoneyBox/util"
-	"github.com/xuri/excelize/v2"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/emmettwoo/EMM-MoneyBox/mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/util"
+	"github.com/xuri/excelize/v2"
 )
 
 var defaultSheetName = "report"
 var defaultRowTitle = []string{"Id", "CategoryId", "CategoryName", "BelongsDate", "FlowType", "Amount", "Description"}
 
-func ExportService(fromDateInString string, toDateInString string, filePath string) error {
+func ExportService(fromDateInString, toDateInString, filePath string) error {
 
 	if filePath == "" {
 		filePath = "./export.xlsx"
@@ -30,7 +31,7 @@ func ExportService(fromDateInString string, toDateInString string, filePath stri
 	return nil
 }
 
-func isExportRequiredFiledSatisfied(fromDate time.Time, toDate time.Time, filePath string) error {
+func isExportRequiredFiledSatisfied(fromDate, toDate time.Time, filePath string) error {
 
 	if util.IsDateTimeEmpty(fromDate) {
 		return errors.New("from_date could not be empty")
