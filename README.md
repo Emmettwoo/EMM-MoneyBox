@@ -13,7 +13,7 @@ emm-moneybox cash query -h
 ### Delete
 emm-moneybox cash delete -h
 ### Outcome
-refactoring now.
+emm-moneybox cash outcome -a {amount} -b {date} -c {category} -d {description}
 ### Income
 non-supported yet.
 ## Category
@@ -27,12 +27,12 @@ non-supported yet.
 non-supported yet.
 ## Manage
 ### export
-refactoring now.
+emm-moneybox manage export -f {from_date} -t {to_date}
 ### import
-refactoring now.
+emm-moneybox manage import -i {file path}
 
 # API
-non-supported yet.
+W.I.P.
 
 # Thanks
 - [cobra](https://github.com/spf13/cobra): a command-line program framework.
@@ -43,4 +43,4 @@ non-supported yet.
 - [mongo-go-driver](https://github.com/mongodb/mongo-go-driver): for MongoDB support.
 
 # Relate
-May put some article here, now empty :lol
+May put some article here, empty for now.

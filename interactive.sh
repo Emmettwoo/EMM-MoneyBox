@@ -5,7 +5,7 @@
 function func_exec_outcome() {
   OUTCOME_AMOUNT=$(gum input --placeholder "input outcome amount here...");
   
-  if [ $OUTCOME_AMOUNT > 0 ]; then
+  if [ "$OUTCOME_AMOUNT" -gt 0 ]; then
     echo "Outcome Amount: $OUTCOME_AMOUNT";
     EXEC_COMMAND="$EXEC_COMMAND -a $OUTCOME_AMOUNT";
     
@@ -38,7 +38,7 @@ function func_exec_query() {
   QUERY_TYPE=$(gum choose "date");
   echo "Query Type: $QUERY_TYPE";
   
-  if [ $QUERY_TYPE = "date" ]; then
+  if [ "$QUERY_TYPE" = "date" ]; then
     EXEC_COMMAND="$EXEC_COMMAND date";
     QUERY_DATE=$(gum input --placeholder "input query date here...");
     if [ -z "$QUERY_DATE" ]; then
@@ -58,7 +58,7 @@ function func_exec_delete() {
   DELETE_TYPE=$(gum choose "id");
   echo "Delete Type: $DELETE_TYPE";
   
-  if [ $DELETE_TYPE = "id" ]; then
+  if [ "$DELETE_TYPE" = "id" ]; then
     EXEC_COMMAND="$EXEC_COMMAND id";
     DELETE_ID=$(gum input --placeholder "input object id here...");
     echo "Delete Id: $DELETE_ID";
@@ -82,13 +82,13 @@ echo "Please choose one of the operation below:";
 EXEC_TYPE=$(gum choose "outcome" "query" "delete");
 echo "Operation Type: $EXEC_TYPE";
 
-if [ $EXEC_TYPE = "outcome" ]; then
+if [ "$EXEC_TYPE" = "outcome" ]; then
   EXEC_COMMAND="go run main.go cash outcome";
   func_exec_outcome;
-elif [ $EXEC_TYPE = "query" ]; then
+elif [ "$EXEC_TYPE" = "query" ]; then
   EXEC_COMMAND="go run main.go cash query";
   func_exec_query;
-elif [ $EXEC_TYPE = "delete" ]; then
+elif [ "$EXEC_TYPE" = "delete" ]; then
   EXEC_COMMAND="go run main.go cash delete";
   func_exec_delete;
 else
