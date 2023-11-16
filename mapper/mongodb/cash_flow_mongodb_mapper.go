@@ -1,147 +1,270 @@
 package mongodb
 
 import (
-	"time"
-
 	"github.com/emmettwoo/EMM-MoneyBox/entity"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
+	"github.com/emmettwoo/EMM-MoneyBox/util/database"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"time"
 )
-
-type CashFlowMongoDbMapper struct{}
 
 var cashFlowMongoDbMapper CashFlowMongoDbMapper
 
-func (CashFlowMongoDbMapper) GetCashFlowByObjectId(objectId primitive.ObjectID) entity.CashFlowEntity {
+type CashFlowMongoDbMapper struct{}
+
+func (CashFlowMongoDbMapper) GetCashFlowByObjectId(plainId string) entity.CashFlowEntity {
+
+	objectId := util.Convert2ObjectId(plainId)
+	if plainId == "" || objectId == primitive.NilObjectID {
+		util.Logger.Warnln("cash_flow's id is not acceptable")
+		return entity.CashFlowEntity{}
+	}
 
 	filter := bson.D{
 		primitive.E{Key: "_id", Value: objectId},
 	}
 
-	// 打开cashFlow的数据表连线
-	util.OpenMongoDbConnection("cashFlow")
-
-	return convertBsonM2CashFlowEntity(util.GetOneInMongoDb(filter))
+	database.OpenMongoDbConnection(database.CashFlowTableName)
+	defer database.CloseMongoDbConnection()
+	return convertBsonM2CashFlowEntity(database.GetOneInMongoDB(filter))
 }
 
-func (CashFlowMongoDbMapper) GetCashFlowsByObjectIdArray(objectIdArray []primitive.ObjectID) []entity.CashFlowEntity {
+func (CashFlowMongoDbMapper) GetCashFlowsByObjectIdArray(plainIdList []string) []entity.CashFlowEntity {
 
-	var entityArray []entity.CashFlowEntity
+	var objectIdArray = make([]primitive.ObjectID, len(plainIdList))
+	for _, plainId := range plainIdList {
+		objectId := util.Convert2ObjectId(plainId)
+		objectIdArray = append(objectIdArray, objectId)
+	}
 
-	// fixme: 未考慮空入參時的情況，(BadValue) $in needs an array
 	filter := bson.D{
 		primitive.E{Key: "_id", Value: bson.M{"$in": objectIdArray}},
 	}
 
 	// 打开cashFlow的数据表连线
-	util.OpenMongoDbConnection("cashFlow")
+	database.OpenMongoDbConnection(database.CashFlowTableName)
+	defer database.CloseMongoDbConnection()
 
 	// 获取查询结果并转入结构对象
-	queryResultArray := util.GetManyInMongoDb(filter)
-	for _, queryResult := range queryResultArray {
-		entityArray = append(entityArray, convertBsonM2CashFlowEntity(queryResult))
+	var targetEntityList []entity.CashFlowEntity
+	queryResultList := database.GetManyInMongoDB(filter)
+	for _, queryResult := range queryResultList {
+		targetEntityList = append(targetEntityList, convertBsonM2CashFlowEntity(queryResult))
 	}
-
-	return entityArray
+	return targetEntityList
 }
 
-func (CashFlowMongoDbMapper) GetCashFlowsByExactDesc(desc string) []entity.CashFlowEntity {
-
-	var entityArray []entity.CashFlowEntity
+func (CashFlowMongoDbMapper) GetCashFlowsByBelongsDate(belongsDate time.Time) []entity.CashFlowEntity {
 
 	filter := bson.D{
-		primitive.E{Key: "desc", Value: desc},
+		primitive.E{Key: "belongs_date", Value: belongsDate},
 	}
 
 	// 打开cashFlow的数据表连线
-	util.OpenMongoDbConnection("cashFlow")
+	database.OpenMongoDbConnection(database.CashFlowTableName)
+	defer database.CloseMongoDbConnection()
 
 	// 获取查询结果并转入结构对象
-	queryResultArray := util.GetManyInMongoDb(filter)
-	for _, queryResult := range queryResultArray {
-		entityArray = append(entityArray, convertBsonM2CashFlowEntity(queryResult))
+	var targetEntityList []entity.CashFlowEntity
+	queryResultList := database.GetManyInMongoDB(filter)
+	for _, queryResult := range queryResultList {
+		targetEntityList = append(targetEntityList, convertBsonM2CashFlowEntity(queryResult))
 	}
-
-	return entityArray
+	return targetEntityList
 }
 
-func (CashFlowMongoDbMapper) GetCashFlowsByFuzzyDesc(desc string) []entity.CashFlowEntity {
+func (CashFlowMongoDbMapper) GetCashFlowsByCategoryId(categoryPlainId string) []entity.CashFlowEntity {
 
-	var entityArray []entity.CashFlowEntity
+	categoryObjectId := util.Convert2ObjectId(categoryPlainId)
+	if categoryPlainId == "" || categoryObjectId == primitive.NilObjectID {
+		util.Logger.Warnln("category's id is not acceptable")
+		return nil
+	}
+
+	filter := bson.D{
+		primitive.E{Key: "category_id", Value: categoryObjectId},
+	}
+
+	database.OpenMongoDbConnection(database.CashFlowTableName)
+	defer database.CloseMongoDbConnection()
+
+	var targetEntityList []entity.CashFlowEntity
+	queryResultList := database.GetManyInMongoDB(filter)
+	for _, queryResult := range queryResultList {
+		targetEntityList = append(targetEntityList, convertBsonM2CashFlowEntity(queryResult))
+	}
+	return targetEntityList
+}
+
+func (CashFlowMongoDbMapper) CountCashFLowsByCategoryId(categoryPlainId string) int64 {
+
+	categoryObjectId := util.Convert2ObjectId(categoryPlainId)
+	if categoryPlainId == "" || categoryObjectId == primitive.NilObjectID {
+		util.Logger.Warnln("category's id is not acceptable")
+		return 0
+	}
+
+	filter := bson.D{
+		primitive.E{Key: "category_id", Value: categoryObjectId},
+	}
+
+	database.OpenMongoDbConnection(database.CashFlowTableName)
+	defer database.CloseMongoDbConnection()
+
+	return database.CountInMongoDB(filter)
+}
+
+func (CashFlowMongoDbMapper) GetCashFlowsByCategoryName(categoryName string) []entity.CashFlowEntity {
+
+	var categoryEntity = categoryMongoDbMapper.GetCategoryByName(categoryName)
+	if categoryEntity.IsEmpty() {
+		util.Logger.Warnln("category name not existed")
+		return nil
+	}
+
+	return cashFlowMongoDbMapper.GetCashFlowsByCategoryId(categoryEntity.Id.Hex())
+}
+
+func (CashFlowMongoDbMapper) GetCashFlowsByExactDesc(description string) []entity.CashFlowEntity {
+
+	filter := bson.D{
+		primitive.E{Key: "description", Value: description},
+	}
+
+	// 打开cashFlow的数据表连线
+	database.OpenMongoDbConnection(database.CashFlowTableName)
+	defer database.CloseMongoDbConnection()
+
+	// 获取查询结果并转入结构对象
+	var targetEntityList []entity.CashFlowEntity
+	queryResultList := database.GetManyInMongoDB(filter)
+	for _, queryResult := range queryResultList {
+		targetEntityList = append(targetEntityList, convertBsonM2CashFlowEntity(queryResult))
+	}
+
+	return targetEntityList
+}
+
+func (CashFlowMongoDbMapper) GetCashFlowsByFuzzyDesc(description string) []entity.CashFlowEntity {
 
 	// Options i for disable case sensitive.
 	filter := bson.D{
-		primitive.E{Key: "desc", Value: primitive.Regex{
-			Pattern: desc,
+		primitive.E{Key: "description", Value: primitive.Regex{
+			Pattern: description,
 			Options: "i",
 		}},
 	}
 
-	// 打开cashFlow的数据表连线
-	util.OpenMongoDbConnection("cashFlow")
+	// 打开 cash_flow 的数据表连线
+	database.OpenMongoDbConnection(database.CashFlowTableName)
+	defer database.CloseMongoDbConnection()
 
 	// 获取查询结果并转入结构对象
-	queryResultArray := util.GetManyInMongoDb(filter)
-	for _, queryResult := range queryResultArray {
-		entityArray = append(entityArray, convertBsonM2CashFlowEntity(queryResult))
+	var targetEntityList []entity.CashFlowEntity
+	queryResultList := database.GetManyInMongoDB(filter)
+	for _, queryResult := range queryResultList {
+		targetEntityList = append(targetEntityList, convertBsonM2CashFlowEntity(queryResult))
 	}
-
-	return entityArray
+	return targetEntityList
 }
 
-func (CashFlowMongoDbMapper) InsertCashFlowByEntity(entity entity.CashFlowEntity, date time.Time) primitive.ObjectID {
+func (CashFlowMongoDbMapper) InsertCashFlowByEntity(newEntity entity.CashFlowEntity) string {
 
-	targetDay := date
-	if (targetDay == time.Time{}) {
-		targetDay = time.Now()
-	}
+	var operatingTime = time.Now()
+	newEntity.CreateTime = operatingTime
+	newEntity.ModifyTime = operatingTime
 
-	util.OpenMongoDbConnection("cashFlow")
-	newCashFlowId := util.InsertOneInMongoDb(convertCashFlowEntity2BsonD(entity))
+	database.OpenMongoDbConnection(database.CashFlowTableName)
+	defer database.CloseMongoDbConnection()
 
-	//todo: 還需新增 flow_ref --20221202
-	// 判断有无dayFlow，无则创建，然後更新cashFlows
-	dayFlowEntity := dayFlowMongoDbMapper.GetDayFlowByDate(targetDay)
-	if dayFlowEntity.IsEmpty() {
-		dayFlowEntity = dayFlowMongoDbMapper.GetDayFlowByObjectId(
-			dayFlowMongoDbMapper.InsertDayFlowByDate(targetDay))
-	}
-	dayFlowEntity.CashFlows = append(dayFlowEntity.CashFlows, newCashFlowId)
-	dayFlowMongoDbMapper.UpdateDayFlowByEntity(dayFlowEntity)
-
-	return newCashFlowId
+	newCashFlowId := database.InsertOneInMongoDB(convertCashFlowEntity2BsonD(newEntity))
+	return newCashFlowId.Hex()
 }
 
-func (CashFlowMongoDbMapper) UpdateCashFlowByEntity(entity entity.CashFlowEntity) bool {
+func (CashFlowMongoDbMapper) UpdateCashFlowByEntity(plainId string) entity.CashFlowEntity {
 
-	if entity.Id == primitive.NilObjectID {
-		panic("CashFlow's id can not be nil.")
+	var objectId = util.Convert2ObjectId(plainId)
+	if plainId == "" || objectId == primitive.NilObjectID {
+		util.Logger.Warnln("cash_flow's id is not acceptable")
+		return entity.CashFlowEntity{}
 	}
-
-	filter := bson.D{
-		primitive.E{Key: "_id", Value: entity.Id},
-	}
-
-	util.OpenMongoDbConnection("cashFlow")
-	return util.UpdateManyInMongoDb(filter, convertCashFlowEntity2BsonD(entity)) == 1
-}
-
-func (CashFlowMongoDbMapper) DeleteCashFlowByObjectId(objectId primitive.ObjectID) entity.CashFlowEntity {
 
 	filter := bson.D{
 		primitive.E{Key: "_id", Value: objectId},
 	}
 
-	//todo: 還需刪除 flow_ref --20221202
-	targetEntity := cashFlowMongoDbMapper.GetCashFlowByObjectId(objectId)
+	database.OpenMongoDbConnection(database.CashFlowTableName)
+	defer database.CloseMongoDbConnection()
+
+	var targetEntity = convertBsonM2CashFlowEntity(database.GetOneInMongoDB(filter))
 	if targetEntity.IsEmpty() {
-		panic("CashFlow does not exist!")
-	} else {
-		util.OpenMongoDbConnection("cashFlow")
-		util.DeleteManyInMongoDb(filter)
-		return targetEntity
+		util.Logger.Infoln("cash_flow is not exist")
+		return entity.CashFlowEntity{}
 	}
+
+	// todo: update specific fields by passing params (category_name, belongs_date, flow_type, amount, description)
+	targetEntity.ModifyTime = time.Now()
+
+	var rowsAffected = database.UpdateManyInMongoDB(filter, convertCashFlowEntity2BsonD(targetEntity))
+	if rowsAffected != 1 {
+		// fixme: maybe we should have a rollback here.
+		util.Logger.Errorw("update failed", "rows_affected", rowsAffected)
+		return entity.CashFlowEntity{}
+	}
+
+	return targetEntity
+}
+
+func (CashFlowMongoDbMapper) DeleteCashFlowByObjectId(plainId string) entity.CashFlowEntity {
+
+	objectId := util.Convert2ObjectId(plainId)
+	if plainId == "" || objectId == primitive.NilObjectID {
+		util.Logger.Warnln("cash_flow's id is not acceptable")
+		return entity.CashFlowEntity{}
+	}
+
+	filter := bson.D{
+		primitive.E{Key: "_id", Value: objectId},
+	}
+
+	database.OpenMongoDbConnection(database.CashFlowTableName)
+	defer database.CloseMongoDbConnection()
+	var targetEntity = convertBsonM2CashFlowEntity(database.GetOneInMongoDB(filter))
+	if targetEntity.IsEmpty() {
+		util.Logger.Infoln("cash_flow is not exist")
+		return entity.CashFlowEntity{}
+	}
+	var rowsAffected = database.DeleteManyInMongoDB(filter)
+	if rowsAffected != 1 {
+		// fixme: maybe we should have a rollback here.
+		util.Logger.Errorw("delete failed", "rows_affected", rowsAffected)
+		return entity.CashFlowEntity{}
+	}
+	return targetEntity
+}
+
+func (CashFlowMongoDbMapper) DeleteCashFlowByBelongsDate(belongsDate time.Time) []entity.CashFlowEntity {
+
+	filter := bson.D{
+		primitive.E{Key: "belongs_date", Value: belongsDate},
+	}
+
+	var cashFlowList = cashFlowMongoDbMapper.GetCashFlowsByBelongsDate(belongsDate)
+	if cashFlowList == nil {
+		util.Logger.Infoln("no cash_flow(s) found")
+		return cashFlowList
+	}
+
+	database.OpenMongoDbConnection(database.CashFlowTableName)
+	defer database.CloseMongoDbConnection()
+
+	var rowsAffected = database.DeleteManyInMongoDB(filter)
+	if rowsAffected != int64(len(cashFlowList)) {
+		// fixme: maybe we should have a rollback here.
+		util.Logger.Errorw("delete failed", "rows_affected", rowsAffected)
+	}
+	return cashFlowList
 }
 
 func convertCashFlowEntity2BsonD(entity entity.CashFlowEntity) bson.D {
@@ -153,18 +276,27 @@ func convertCashFlowEntity2BsonD(entity entity.CashFlowEntity) bson.D {
 
 	return bson.D{
 		primitive.E{Key: "_id", Value: entity.Id},
+		primitive.E{Key: "category_id", Value: entity.CategoryId},
+		primitive.E{Key: "belongs_date", Value: entity.BelongsDate},
+		primitive.E{Key: "flow_type", Value: entity.FlowType},
 		primitive.E{Key: "amount", Value: entity.Amount},
-		primitive.E{Key: "category", Value: entity.Category},
-		primitive.E{Key: "desc", Value: entity.Desc},
+		primitive.E{Key: "description", Value: entity.Description},
 		primitive.E{Key: "remark", Value: entity.Remark},
+		primitive.E{Key: "create_time", Value: entity.CreateTime},
+		primitive.E{Key: "modify_time", Value: entity.ModifyTime},
 	}
 }
 
 func convertBsonM2CashFlowEntity(bsonM bson.M) entity.CashFlowEntity {
+
 	var newEntity entity.CashFlowEntity
-	bsonBytes, _ := bson.Marshal(bsonM)
-	err := bson.Unmarshal(bsonBytes, &newEntity)
+	bsonBytes, err := bson.Marshal(bsonM)
 	if err != nil {
+		util.Logger.Errorln(err)
+		panic(err)
+	}
+	if err = bson.Unmarshal(bsonBytes, &newEntity); err != nil {
+		util.Logger.Errorln(err)
 		panic(err)
 	}
 	return newEntity

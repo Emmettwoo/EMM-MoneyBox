@@ -10,9 +10,14 @@ func init() {
 }
 
 func initDefaultValues() {
-	configurationMap["db.name"] = "emm-money-box"
-	configurationMap["db.type"] = "mongodb"
-	configurationMap["db.url"] = os.Getenv("MONGO_DB_URI")
+	configurationMap["logger.file"] = "./emm-moneybox.log"
+	configurationMap["db.name"] = "emm_moneybox"
+	// format: mongodb / mysql
+	configurationMap["db.type"] = "mysql"
+	// format: mongodb+srv://
+	configurationMap["db.mongodb.url"] = os.Getenv("MONGO_DB_URI")
+	// format: user:password@tcp(host:port)
+	configurationMap["db.mysql.url"] = os.Getenv("MYSQL_DB_URI")
 }
 
 func GetConfigByKey(configKey string) string {

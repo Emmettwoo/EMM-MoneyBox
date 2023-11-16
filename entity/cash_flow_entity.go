@@ -4,16 +4,21 @@ import (
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"reflect"
 	"strconv"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type CashFlowEntity struct {
-	Id       primitive.ObjectID `bson:"_id,omitempty"`
-	Amount   float64            `json:"amount" bson:"amount"`
-	Category string             `json:"category" bson:"category"`
-	Desc     string             `json:"desc" bson:"desc"`
-	Remark   string             `json:"remark" bson:"remark"`
+	Id          primitive.ObjectID `bson:"_id,omitempty"`
+	CategoryId  primitive.ObjectID `json:"category_id" bson:"category_id"`
+	BelongsDate time.Time          `json:"belongs_date" bson:"belongs_date"`
+	FlowType    string             `json:"flow_type" bson:"flow_type"`
+	Amount      float64            `json:"amount" bson:"amount"`
+	Description string             `json:"description" bson:"description"`
+	Remark      string             `json:"remark" bson:"remark"`
+	CreateTime  time.Time          `json:"create_time" bson:"create_time"`
+	ModifyTime  time.Time          `json:"modify_time" bson:"modify_time"`
 }
 
 func (entity CashFlowEntity) IsEmpty() bool {
@@ -22,12 +27,15 @@ func (entity CashFlowEntity) IsEmpty() bool {
 
 func (entity CashFlowEntity) ToString() string {
 
+	// todo: category query from cache like redis would be better.
 	return "[ " +
 		"Id: " + entity.Id.Hex() +
-		", Category: " + entity.Category +
+		// fixme: using mapper to fetch category name?
+		// ", Category: " + mapper.GetCategoryMapper().GetCategoryByObjectId(entity.CategoryId.Hex()).Name +
+		", Date: " + util.FormatDateToStringWithoutDash(entity.BelongsDate) +
+		", FlowType: " + entity.FlowType +
 		", Amount: " + strconv.FormatFloat(entity.Amount, 'f', 2, 64) +
-		", Desc: " + entity.Desc +
-		// ", Remark: " + entity.Remark +
+		", Description: " + entity.Description +
 		" ]"
 }
 
@@ -37,20 +45,25 @@ func (entity CashFlowEntity) Build(fieldMap map[string]string) CashFlowEntity {
 		switch key {
 		case "Id":
 			objectId, err := primitive.ObjectIDFromHex(value)
-			newEntity.Id = objectId
 			if err != nil {
-				util.Logger.Warn("build cash_flow failed with err: " + err.Error())
+				util.Logger.Warnln("build cash failed with err: " + err.Error())
 			}
+			newEntity.Id = objectId
+		case "CategoryId":
+			newEntity.CategoryId = util.Convert2ObjectId(value)
+		case "BelongsDate":
+			newEntity.BelongsDate = util.FormatDateFromStringWithoutDash(value)
+		case "FlowType":
+			// todo: use enum to check if value available
+			newEntity.FlowType = value
 		case "Amount":
 			amount, err := strconv.ParseFloat(value, 64)
-			newEntity.Amount = amount
 			if err != nil {
-				util.Logger.Warn("build cash_flow failed with err: " + err.Error())
+				util.Logger.Warnln("build cash failed with err: " + err.Error())
 			}
-		case "Category":
-			newEntity.Category = value
-		case "Desc":
-			newEntity.Desc = value
+			newEntity.Amount = amount
+		case "Description":
+			newEntity.Description = value
 		case "Remark":
 			newEntity.Remark = value
 		}
