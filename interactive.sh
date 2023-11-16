@@ -5,7 +5,7 @@
 function func_exec_outcome() {
   OUTCOME_AMOUNT=$(gum input --placeholder "input outcome amount here...");
   
-  if [ $OUTCOME_AMOUNT > 0 ]; then
+  if [ $OUTCOME_AMOUNT -gt 0 ]; then
     echo "Outcome Amount: $OUTCOME_AMOUNT";
     EXEC_COMMAND="$EXEC_COMMAND -a $OUTCOME_AMOUNT";
     
