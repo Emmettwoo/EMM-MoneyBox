@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+
 	"github.com/emmettwoo/EMM-MoneyBox/service/cash_flow_service"
 	"github.com/spf13/cobra"
 )
@@ -35,6 +36,15 @@ var outcomeCmd4CashFlow = &cobra.Command{
 	Short: "add new outcome cash_flow",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return cash_flow_service.OutcomeService(
+			belongsDate4CashFlow, categoryName4CashFlow, amount4CashFlow, exactDescription4CashFlow)
+	},
+}
+
+var incomeCmd4CashFlow = &cobra.Command{
+	Use:   "income",
+	Short: "add new income cash_flow",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return cash_flow_service.IncomeService(
 			belongsDate4CashFlow, categoryName4CashFlow, amount4CashFlow, exactDescription4CashFlow)
 	},
 }
@@ -82,8 +92,18 @@ func init() {
 		&amount4CashFlow, "amount", "a", 0.00, "flow's amount (required)")
 	outcomeCmd4CashFlow.Flags().StringVarP(
 		&exactDescription4CashFlow, "description", "d", "", "flow's description (optional, could be blank)")
-
 	cashCmd.AddCommand(outcomeCmd4CashFlow)
+
+	// add sub-command: income
+	incomeCmd4CashFlow.Flags().StringVarP(
+		&belongsDate4CashFlow, "date", "b", "", "flow's belongs-date (optional, blank for today)")
+	incomeCmd4CashFlow.Flags().StringVarP(
+		&categoryName4CashFlow, "category", "c", "", "flow's category name (required)")
+	incomeCmd4CashFlow.Flags().Float64VarP(
+		&amount4CashFlow, "amount", "a", 0.00, "flow's amount (required)")
+	incomeCmd4CashFlow.Flags().StringVarP(
+		&exactDescription4CashFlow, "description", "d", "", "flow's description (optional, could be blank)")
+	cashCmd.AddCommand(incomeCmd4CashFlow)
 
 	// add command: cash
 	rootCmd.AddCommand(cashCmd)
