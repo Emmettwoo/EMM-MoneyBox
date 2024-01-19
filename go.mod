@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/go-sql-driver/mysql v1.7.1
+	github.com/gorilla/mux v1.8.1
 	github.com/shopspring/decimal v1.3.1
 	github.com/spf13/cobra v1.1.3
 	github.com/xuri/excelize/v2 v2.7.1
