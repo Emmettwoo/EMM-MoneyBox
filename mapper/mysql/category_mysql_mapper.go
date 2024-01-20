@@ -3,18 +3,19 @@ package mysql
 import (
 	"bytes"
 	"database/sql"
-	"github.com/emmettwoo/EMM-MoneyBox/entity"
+	"time"
+
+	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/emmettwoo/EMM-MoneyBox/util/database"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"time"
 )
 
 var categoryMySqlMapper CategoryMySqlMapper
 
 type CategoryMySqlMapper struct{}
 
-func (CategoryMySqlMapper) GetCategoryByObjectId(plainId string) entity.CategoryEntity {
+func (CategoryMySqlMapper) GetCategoryByObjectId(plainId string) model.CategoryEntity {
 
 	var sqlString bytes.Buffer
 	sqlString.WriteString("SELECT ID, PARENT_ID, NAME FROM ")
@@ -29,7 +30,7 @@ func (CategoryMySqlMapper) GetCategoryByObjectId(plainId string) entity.Category
 		util.Logger.Errorw("query failed", "error", err)
 	}
 
-	var categoryEntity entity.CategoryEntity
+	var categoryEntity model.CategoryEntity
 	for rows.Next() {
 		categoryEntity = convertRow2CategoryEntity(rows)
 		break
@@ -37,7 +38,7 @@ func (CategoryMySqlMapper) GetCategoryByObjectId(plainId string) entity.Category
 	return categoryEntity
 }
 
-func (CategoryMySqlMapper) GetCategoryByName(categoryName string) entity.CategoryEntity {
+func (CategoryMySqlMapper) GetCategoryByName(categoryName string) model.CategoryEntity {
 
 	var sqlString bytes.Buffer
 	sqlString.WriteString("SELECT ID, PARENT_ID, NAME FROM ")
@@ -52,7 +53,7 @@ func (CategoryMySqlMapper) GetCategoryByName(categoryName string) entity.Categor
 		util.Logger.Errorw("query failed", "error", err)
 	}
 
-	var categoryEntity entity.CategoryEntity
+	var categoryEntity model.CategoryEntity
 	for rows.Next() {
 		categoryEntity = convertRow2CategoryEntity(rows)
 		break
@@ -60,7 +61,7 @@ func (CategoryMySqlMapper) GetCategoryByName(categoryName string) entity.Categor
 	return categoryEntity
 }
 
-func (CategoryMySqlMapper) GetCategoryByParentId(parentPlainId string) []entity.CategoryEntity {
+func (CategoryMySqlMapper) GetCategoryByParentId(parentPlainId string) []model.CategoryEntity {
 	var sqlString bytes.Buffer
 	sqlString.WriteString("SELECT ID, PARENT_ID, NAME FROM ")
 	sqlString.WriteString(database.CategoryTableName)
@@ -74,14 +75,14 @@ func (CategoryMySqlMapper) GetCategoryByParentId(parentPlainId string) []entity.
 		util.Logger.Errorw("query failed", "error", err)
 	}
 
-	var targetEntityList []entity.CategoryEntity
+	var targetEntityList []model.CategoryEntity
 	for rows.Next() {
 		targetEntityList = append(targetEntityList, convertRow2CategoryEntity(rows))
 	}
 	return targetEntityList
 }
 
-func (CategoryMySqlMapper) InsertCategoryByEntity(newEntity entity.CategoryEntity) string {
+func (CategoryMySqlMapper) InsertCategoryByEntity(newEntity model.CategoryEntity) string {
 
 	var operatingTime = time.Now()
 	newEntity.CreateTime = operatingTime
@@ -120,12 +121,12 @@ func (CategoryMySqlMapper) InsertCategoryByEntity(newEntity entity.CategoryEntit
 	return newPlainId
 }
 
-func (CategoryMySqlMapper) UpdateCategoryByEntity(plainId string) entity.CategoryEntity {
+func (CategoryMySqlMapper) UpdateCategoryByEntity(plainId string) model.CategoryEntity {
 
 	var targetEntity = categoryMySqlMapper.GetCategoryByObjectId(plainId)
 	if targetEntity.IsEmpty() {
 		util.Logger.Infoln("category is not exist")
-		return entity.CategoryEntity{}
+		return model.CategoryEntity{}
 	}
 
 	// todo: update specific fields by passing params (parentId, name)
@@ -162,24 +163,24 @@ func (CategoryMySqlMapper) UpdateCategoryByEntity(plainId string) entity.Categor
 	return targetEntity
 }
 
-func (CategoryMySqlMapper) DeleteCategoryByObjectId(plainId string) entity.CategoryEntity {
+func (CategoryMySqlMapper) DeleteCategoryByObjectId(plainId string) model.CategoryEntity {
 
 	var targetEntity = categoryMySqlMapper.GetCategoryByObjectId(plainId)
 	if targetEntity.IsEmpty() {
 		util.Logger.Infoln("category is not exist")
-		return entity.CategoryEntity{}
+		return model.CategoryEntity{}
 	}
 
 	// can not delete a category that has referred cash_flows.
 	if cashFlowMySqlMapper.CountCashFLowsByCategoryId(targetEntity.Id.Hex()) != 0 {
 		util.Logger.Infoln("can not delete a category which has cash_flows refer to")
-		return entity.CategoryEntity{}
+		return model.CategoryEntity{}
 	}
 
 	// can not delete a category that has referred child-categories.
 	if len(categoryMySqlMapper.GetCategoryByParentId(plainId)) != 0 {
 		util.Logger.Infoln("can not delete a category which has child-categories refer to")
-		return entity.CategoryEntity{}
+		return model.CategoryEntity{}
 	}
 
 	var sqlString bytes.Buffer
@@ -208,7 +209,7 @@ func (CategoryMySqlMapper) DeleteCategoryByObjectId(plainId string) entity.Categ
 	return targetEntity
 }
 
-func convertRow2CategoryEntity(rows *sql.Rows) entity.CategoryEntity {
+func convertRow2CategoryEntity(rows *sql.Rows) model.CategoryEntity {
 
 	var id string
 	var parentId string
@@ -219,7 +220,7 @@ func convertRow2CategoryEntity(rows *sql.Rows) entity.CategoryEntity {
 		util.Logger.Errorw("covert into entity failed", "error", err)
 	}
 
-	return entity.CategoryEntity{
+	return model.CategoryEntity{
 		Id:       util.Convert2ObjectId(id),
 		ParentId: util.Convert2ObjectId(parentId),
 		Name:     name,

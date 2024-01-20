@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/emmettwoo/EMM-MoneyBox/entity"
 	"github.com/emmettwoo/EMM-MoneyBox/mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 )
 
@@ -32,25 +32,25 @@ func IsDeleteFieldsConflicted(plainId, belongsDate string) bool {
 	return !semiOptionalFieldFilledFlag
 }
 
-func DeleteById(plainId string) (entity.CashFlowEntity, error) {
+func DeleteById(plainId string) (model.CashFlowEntity, error) {
 
 	var existCashFlowEntity = mapper.CashFlowCommonMapper.GetCashFlowByObjectId(plainId)
 	if existCashFlowEntity.IsEmpty() {
-		return entity.CashFlowEntity{}, errors.New("cash_flow not found")
+		return model.CashFlowEntity{}, errors.New("cash_flow not found")
 	}
 
 	existCashFlowEntity = mapper.CashFlowCommonMapper.DeleteCashFlowByObjectId(plainId)
 	if existCashFlowEntity.IsEmpty() {
-		return entity.CashFlowEntity{}, errors.New("cash_flow delete failed")
+		return model.CashFlowEntity{}, errors.New("cash_flow delete failed")
 	}
 	return existCashFlowEntity, nil
 }
 
-func DeleteByDate(belongsDate string) ([]entity.CashFlowEntity, error) {
+func DeleteByDate(belongsDate string) ([]model.CashFlowEntity, error) {
 
 	var deleteDate = util.FormatDateFromStringWithoutDash(belongsDate)
 	if reflect.DeepEqual(deleteDate, time.Time{}) {
-		return []entity.CashFlowEntity{}, errors.New("belongs_date error, try format like 19700101")
+		return []model.CashFlowEntity{}, errors.New("belongs_date error, try format like 19700101")
 	}
 
 	cashFlowList := mapper.CashFlowCommonMapper.DeleteCashFlowByBelongsDate(deleteDate)

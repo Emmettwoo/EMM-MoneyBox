@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/emmettwoo/EMM-MoneyBox/entity"
 	"github.com/emmettwoo/EMM-MoneyBox/mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 )
 
@@ -48,20 +48,20 @@ func IsQueryFieldsConflicted(plainId, belongsDate, exactDescription, fuzzyDescri
 	return !semiOptionalFieldFilledFlag
 }
 
-func QueryById(plainId string) (entity.CashFlowEntity, error) {
+func QueryById(plainId string) (model.CashFlowEntity, error) {
 
 	cashFlowEntity := mapper.CashFlowCommonMapper.GetCashFlowByObjectId(plainId)
 	if cashFlowEntity.IsEmpty() {
-		return entity.CashFlowEntity{}, errors.New("cash_flow not found")
+		return model.CashFlowEntity{}, errors.New("cash_flow not found")
 	}
 	return cashFlowEntity, nil
 }
 
-func QueryByDate(belongsDate string) ([]entity.CashFlowEntity, error) {
+func QueryByDate(belongsDate string) ([]model.CashFlowEntity, error) {
 
 	var queryDate = util.FormatDateFromStringWithoutDash(belongsDate)
 	if reflect.DeepEqual(queryDate, time.Time{}) {
-		return []entity.CashFlowEntity{}, errors.New("belongs_date error, try format like 19700101")
+		return []model.CashFlowEntity{}, errors.New("belongs_date error, try format like 19700101")
 	}
 
 	matchedCashFlowList := mapper.CashFlowCommonMapper.GetCashFlowsByBelongsDate(queryDate)
@@ -69,12 +69,12 @@ func QueryByDate(belongsDate string) ([]entity.CashFlowEntity, error) {
 	return matchedCashFlowList, nil
 }
 
-func QueryByExactDescription(exactDescription string) ([]entity.CashFlowEntity, error) {
+func QueryByExactDescription(exactDescription string) ([]model.CashFlowEntity, error) {
 	matchedCashFlowList := mapper.CashFlowCommonMapper.GetCashFlowsByExactDesc(exactDescription)
 	return matchedCashFlowList, nil
 }
 
-func QueryByFuzzyDescription(fuzzyDescription string) ([]entity.CashFlowEntity, error) {
+func QueryByFuzzyDescription(fuzzyDescription string) ([]model.CashFlowEntity, error) {
 	matchedCashFlowList := mapper.CashFlowCommonMapper.GetCashFlowsByFuzzyDesc(fuzzyDescription)
 	return matchedCashFlowList, nil
 }

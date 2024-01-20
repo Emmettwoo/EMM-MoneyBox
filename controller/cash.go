@@ -1,32 +1,15 @@
-package api
+package controller
 
 import (
 	"net/http"
 
+	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/service/cash_flow_service"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/gorilla/mux"
 )
 
-// todo(emmett): move to model layer.
-type CashFlowEntityDTO struct {
-	BelongsDate  string  `json:"belongs_date"`
-	CategoryName string  `json:"category_name"`
-	Amount       float64 `json:"amount"`
-	Description  string  `json:"description"`
-}
-
-// todo(emmett): move all register to route.go file (aloneside root.go).
-func RegisterCashRoute(r *mux.Router) {
-	r.HandleFunc("/api/cash/outcome", outcome).Methods("POST")
-	r.HandleFunc("/api/cash/income", income).Methods("POST")
-	r.HandleFunc("/api/cash/{id}", queryById).Methods("GET")
-	r.HandleFunc("/api/cash/date/{date}", queryByDate).Methods("GET")
-	r.HandleFunc("/api/cash/{id}", deleteById).Methods("DELETE")
-	r.HandleFunc("/api/cash/date/{date}", deleteByDate).Methods("DELETE")
-}
-
-func queryById(w http.ResponseWriter, r *http.Request) {
+func CashQueryById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	plainId := vars["id"]
 	if plainId == "" {
@@ -40,7 +23,7 @@ func queryById(w http.ResponseWriter, r *http.Request) {
 	util.ComposeJSONResponse(w, http.StatusOK, cashFlowEntity)
 }
 
-func queryByDate(w http.ResponseWriter, r *http.Request) {
+func CashQueryByDate(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	belongsDate := vars["date"]
 	if belongsDate == "" {
@@ -54,7 +37,7 @@ func queryByDate(w http.ResponseWriter, r *http.Request) {
 	util.ComposeJSONResponse(w, http.StatusOK, cashFlowEntityList)
 }
 
-func deleteById(w http.ResponseWriter, r *http.Request) {
+func CashDeleteById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	plainId := vars["id"]
 	if plainId == "" {
@@ -68,7 +51,7 @@ func deleteById(w http.ResponseWriter, r *http.Request) {
 	util.ComposeJSONResponse(w, http.StatusOK, cashFlowEntity)
 }
 
-func deleteByDate(w http.ResponseWriter, r *http.Request) {
+func CashDeleteByDate(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	date := vars["date"]
 	if date == "" {
@@ -82,9 +65,9 @@ func deleteByDate(w http.ResponseWriter, r *http.Request) {
 	util.ComposeJSONResponse(w, http.StatusOK, cashFlowEntityList)
 }
 
-func outcome(w http.ResponseWriter, r *http.Request) {
+func CashSaveOutcome(w http.ResponseWriter, r *http.Request) {
 
-	var requestBody CashFlowEntityDTO
+	var requestBody model.CashFlowDTO
 	err := util.ParseJSONRequest(r, &requestBody)
 	if err != nil {
 		util.ComposeJSONResponse(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
@@ -104,9 +87,9 @@ func outcome(w http.ResponseWriter, r *http.Request) {
 	util.ComposeJSONResponse(w, http.StatusOK, cashFlowEntity)
 }
 
-func income(w http.ResponseWriter, r *http.Request) {
+func CashSaveIncome(w http.ResponseWriter, r *http.Request) {
 
-	var requestBody CashFlowEntityDTO
+	var requestBody model.CashFlowDTO
 	err := util.ParseJSONRequest(r, &requestBody)
 	if err != nil {
 		util.ComposeJSONResponse(w, http.StatusBadRequest, map[string]string{"error": err.Error()})

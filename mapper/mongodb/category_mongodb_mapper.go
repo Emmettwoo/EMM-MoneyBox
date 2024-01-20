@@ -1,24 +1,25 @@
 package mongodb
 
 import (
-	"github.com/emmettwoo/EMM-MoneyBox/entity"
+	"time"
+
+	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/emmettwoo/EMM-MoneyBox/util/database"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"time"
 )
 
 var categoryMongoDbMapper CategoryMongoDbMapper
 
 type CategoryMongoDbMapper struct{}
 
-func (CategoryMongoDbMapper) GetCategoryByObjectId(plainId string) entity.CategoryEntity {
+func (CategoryMongoDbMapper) GetCategoryByObjectId(plainId string) model.CategoryEntity {
 
 	objectId := util.Convert2ObjectId(plainId)
 	if plainId == "" || objectId == primitive.NilObjectID {
 		util.Logger.Warnln("category's id is not acceptable")
-		return entity.CategoryEntity{}
+		return model.CategoryEntity{}
 	}
 
 	filter := bson.D{
@@ -30,7 +31,7 @@ func (CategoryMongoDbMapper) GetCategoryByObjectId(plainId string) entity.Catego
 	return convertBsonM2CategoryEntity(database.GetOneInMongoDB(filter))
 }
 
-func (CategoryMongoDbMapper) GetCategoryByName(categoryName string) entity.CategoryEntity {
+func (CategoryMongoDbMapper) GetCategoryByName(categoryName string) model.CategoryEntity {
 
 	filter := bson.D{
 		primitive.E{Key: "name", Value: categoryName},
@@ -41,7 +42,7 @@ func (CategoryMongoDbMapper) GetCategoryByName(categoryName string) entity.Categ
 	return convertBsonM2CategoryEntity(database.GetOneInMongoDB(filter))
 }
 
-func (CategoryMongoDbMapper) GetCategoryByParentId(parentPlainId string) []entity.CategoryEntity {
+func (CategoryMongoDbMapper) GetCategoryByParentId(parentPlainId string) []model.CategoryEntity {
 
 	filter := bson.D{
 		primitive.E{Key: "parent_id", Value: parentPlainId},
@@ -50,7 +51,7 @@ func (CategoryMongoDbMapper) GetCategoryByParentId(parentPlainId string) []entit
 	database.OpenMongoDbConnection(database.CategoryTableName)
 	defer database.CloseMongoDbConnection()
 
-	var targetEntityList []entity.CategoryEntity
+	var targetEntityList []model.CategoryEntity
 	queryResultList := database.GetManyInMongoDB(filter)
 	for _, queryResult := range queryResultList {
 		targetEntityList = append(targetEntityList, convertBsonM2CategoryEntity(queryResult))
@@ -59,7 +60,7 @@ func (CategoryMongoDbMapper) GetCategoryByParentId(parentPlainId string) []entit
 	return targetEntityList
 }
 
-func (CategoryMongoDbMapper) InsertCategoryByEntity(newEntity entity.CategoryEntity) string {
+func (CategoryMongoDbMapper) InsertCategoryByEntity(newEntity model.CategoryEntity) string {
 
 	var operatingTime = time.Now()
 	newEntity.CreateTime = operatingTime
@@ -72,12 +73,12 @@ func (CategoryMongoDbMapper) InsertCategoryByEntity(newEntity entity.CategoryEnt
 	return newCategoryId.Hex()
 }
 
-func (CategoryMongoDbMapper) UpdateCategoryByEntity(plainId string) entity.CategoryEntity {
+func (CategoryMongoDbMapper) UpdateCategoryByEntity(plainId string) model.CategoryEntity {
 
 	var objectId = util.Convert2ObjectId(plainId)
 	if plainId == "" || objectId == primitive.NilObjectID {
 		util.Logger.Warnln("category's id is not acceptable")
-		return entity.CategoryEntity{}
+		return model.CategoryEntity{}
 	}
 
 	filter := bson.D{
@@ -90,7 +91,7 @@ func (CategoryMongoDbMapper) UpdateCategoryByEntity(plainId string) entity.Categ
 	var targetEntity = convertBsonM2CategoryEntity(database.GetOneInMongoDB(filter))
 	if targetEntity.IsEmpty() {
 		util.Logger.Infoln("category is not exist")
-		return entity.CategoryEntity{}
+		return model.CategoryEntity{}
 	}
 
 	// todo: update specific fields by passing params (parentId, name)
@@ -100,18 +101,18 @@ func (CategoryMongoDbMapper) UpdateCategoryByEntity(plainId string) entity.Categ
 	if rowsAffected != 1 {
 		// fixme: maybe we should have a rollback here.
 		util.Logger.Errorw("update failed", "rows_affected", rowsAffected)
-		return entity.CategoryEntity{}
+		return model.CategoryEntity{}
 	}
 
-	return entity.CategoryEntity{}
+	return model.CategoryEntity{}
 }
 
-func (CategoryMongoDbMapper) DeleteCategoryByObjectId(plainId string) entity.CategoryEntity {
+func (CategoryMongoDbMapper) DeleteCategoryByObjectId(plainId string) model.CategoryEntity {
 
 	objectId := util.Convert2ObjectId(plainId)
 	if plainId == "" || objectId == primitive.NilObjectID {
 		util.Logger.Warnln("category's id is not acceptable")
-		return entity.CategoryEntity{}
+		return model.CategoryEntity{}
 	}
 
 	filter := bson.D{
@@ -124,31 +125,31 @@ func (CategoryMongoDbMapper) DeleteCategoryByObjectId(plainId string) entity.Cat
 	var targetEntity = convertBsonM2CategoryEntity(database.GetOneInMongoDB(filter))
 	if targetEntity.IsEmpty() {
 		util.Logger.Infoln("category is not exist")
-		return entity.CategoryEntity{}
+		return model.CategoryEntity{}
 	}
 
 	// can not delete a category that has referred cash_flows.
 	if cashFlowMongoDbMapper.CountCashFLowsByCategoryId(targetEntity.Id.Hex()) != 0 {
 		util.Logger.Infoln("can not delete a category which has cash_flows refer to")
-		return entity.CategoryEntity{}
+		return model.CategoryEntity{}
 	}
 
 	// can not delete a category that has referred child-categories.
 	if len(categoryMongoDbMapper.GetCategoryByParentId(plainId)) != 0 {
 		util.Logger.Infoln("can not delete a category which has child-categories refer to")
-		return entity.CategoryEntity{}
+		return model.CategoryEntity{}
 	}
 
 	var rowsAffected = database.DeleteManyInMongoDB(filter)
 	if rowsAffected != 1 {
 		// fixme: maybe we should have a rollback here.
 		util.Logger.Errorw("delete failed", "rows_affected", rowsAffected)
-		return entity.CategoryEntity{}
+		return model.CategoryEntity{}
 	}
 	return targetEntity
 }
 
-func convertCategoryEntity2BsonD(entity entity.CategoryEntity) bson.D {
+func convertCategoryEntity2BsonD(entity model.CategoryEntity) bson.D {
 
 	// 为空时自动生成新Id
 	if entity.Id == primitive.NilObjectID {
@@ -165,9 +166,9 @@ func convertCategoryEntity2BsonD(entity entity.CategoryEntity) bson.D {
 	}
 }
 
-func convertBsonM2CategoryEntity(bsonM bson.M) entity.CategoryEntity {
+func convertBsonM2CategoryEntity(bsonM bson.M) model.CategoryEntity {
 
-	var newEntity entity.CategoryEntity
+	var newEntity model.CategoryEntity
 	bsonBytes, _ := bson.Marshal(bsonM)
 	err := bson.Unmarshal(bsonBytes, &newEntity)
 	if err != nil {

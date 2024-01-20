@@ -1,10 +1,11 @@
-package entity
+package model
 
 import (
-	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"reflect"
 	"strconv"
 	"time"
+
+	"github.com/emmettwoo/EMM-MoneyBox/util"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

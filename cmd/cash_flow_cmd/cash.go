@@ -1,4 +1,4 @@
-package cmd
+package cash_flow_cmd
 
 import (
 	"errors"
@@ -134,7 +134,7 @@ var outcomeCmd4CashFlow = &cobra.Command{
 		if !cash_flow_service.IsOutcomeRequiredFiledSatisfied(categoryName4CashFlow, amount4CashFlow) {
 			return errors.New("some required fields are empty")
 		}
-		cashFlowEntity, err :=  cash_flow_service.SaveOutcome(belongsDate4CashFlow, categoryName4CashFlow, amount4CashFlow, exactDescription4CashFlow)
+		cashFlowEntity, err := cash_flow_service.SaveOutcome(belongsDate4CashFlow, categoryName4CashFlow, amount4CashFlow, exactDescription4CashFlow)
 		if err != nil {
 			return err
 		}
@@ -160,7 +160,7 @@ var incomeCmd4CashFlow = &cobra.Command{
 	},
 }
 
-var cashCmd = &cobra.Command{
+var CashCmd = &cobra.Command{
 	Use:   "cash",
 	Short: "operating cash_flow data",
 	Long: `
@@ -184,14 +184,14 @@ func init() {
 		&exactDescription4CashFlow, "exact", "e", "", "query by exact-description")
 	queryCmd4CashFlow.Flags().StringVarP(
 		&fuzzyDescription4CashFlow, "fuzzy", "f", "", "query by fuzzy-description")
-	cashCmd.AddCommand(queryCmd4CashFlow)
+	CashCmd.AddCommand(queryCmd4CashFlow)
 
 	// add sub-command: delete
 	deleteCmd4CashFlow.Flags().StringVarP(
 		&plainId4CashFlow, "id", "i", "", "delete by id")
 	deleteCmd4CashFlow.Flags().StringVarP(
 		&belongsDate4CashFlow, "date", "b", "", "delete by belongs-date")
-	cashCmd.AddCommand(deleteCmd4CashFlow)
+	CashCmd.AddCommand(deleteCmd4CashFlow)
 
 	// todo: add sub-command: update (by id)
 
@@ -204,7 +204,7 @@ func init() {
 		&amount4CashFlow, "amount", "a", 0.00, "flow's amount (required)")
 	outcomeCmd4CashFlow.Flags().StringVarP(
 		&exactDescription4CashFlow, "description", "d", "", "flow's description (optional, could be blank)")
-	cashCmd.AddCommand(outcomeCmd4CashFlow)
+	CashCmd.AddCommand(outcomeCmd4CashFlow)
 
 	// add sub-command: income
 	incomeCmd4CashFlow.Flags().StringVarP(
@@ -215,8 +215,5 @@ func init() {
 		&amount4CashFlow, "amount", "a", 0.00, "flow's amount (required)")
 	incomeCmd4CashFlow.Flags().StringVarP(
 		&exactDescription4CashFlow, "description", "d", "", "flow's description (optional, could be blank)")
-	cashCmd.AddCommand(incomeCmd4CashFlow)
-
-	// add command: cash
-	rootCmd.AddCommand(cashCmd)
+	CashCmd.AddCommand(incomeCmd4CashFlow)
 }

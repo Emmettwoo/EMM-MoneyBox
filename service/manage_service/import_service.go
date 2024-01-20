@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/emmettwoo/EMM-MoneyBox/entity"
 	"github.com/emmettwoo/EMM-MoneyBox/mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/xuri/excelize/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -181,7 +181,7 @@ func handleCategoryInfo(categoryId, categoryName string) string {
 	util.Logger.Warnw("category not existed", "category_name", categoryName)
 
 	// create new category for this flow
-	var plainId = mapper.CategoryCommonMapper.InsertCategoryByEntity(entity.CategoryEntity{
+	var plainId = mapper.CategoryCommonMapper.InsertCategoryByEntity(model.CategoryEntity{
 		Name:   categoryName,
 		Remark: "create by import",
 	})
@@ -190,7 +190,7 @@ func handleCategoryInfo(categoryId, categoryName string) string {
 
 func saveIntoDB(cashFlowMapByColumnList []map[string]string) {
 	for _, cashFlowMapByColumn := range cashFlowMapByColumnList {
-		var cashFlowEntity = entity.CashFlowEntity{}.Build(cashFlowMapByColumn)
+		var cashFlowEntity = model.CashFlowEntity{}.Build(cashFlowMapByColumn)
 		if cashFlowEntity.Id != primitive.NilObjectID {
 			var existedCashFlow = mapper.CashFlowCommonMapper.GetCashFlowByObjectId(cashFlowEntity.Id.Hex())
 			if !existedCashFlow.IsEmpty() {

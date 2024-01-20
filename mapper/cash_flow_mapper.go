@@ -1,11 +1,12 @@
 package mapper
 
 import (
-	"github.com/emmettwoo/EMM-MoneyBox/entity"
+	"time"
+
 	"github.com/emmettwoo/EMM-MoneyBox/mapper/mongodb"
 	"github.com/emmettwoo/EMM-MoneyBox/mapper/mysql"
+	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
-	"time"
 )
 
 var cashFlowMongoDbMapper CashFlowMapper
@@ -13,18 +14,18 @@ var cashFlowMySqlMapper CashFlowMapper
 var CashFlowCommonMapper CashFlowMapper
 
 type CashFlowMapper interface {
-	GetCashFlowByObjectId(plainId string) entity.CashFlowEntity
-	GetCashFlowsByObjectIdArray(plainIdList []string) []entity.CashFlowEntity
-	GetCashFlowsByBelongsDate(belongsDate time.Time) []entity.CashFlowEntity
-	GetCashFlowsByCategoryId(categoryPlainId string) []entity.CashFlowEntity
-	GetCashFlowsByCategoryName(categoryName string) []entity.CashFlowEntity
-	GetCashFlowsByExactDesc(description string) []entity.CashFlowEntity
-	GetCashFlowsByFuzzyDesc(description string) []entity.CashFlowEntity
+	GetCashFlowByObjectId(plainId string) model.CashFlowEntity
+	GetCashFlowsByObjectIdArray(plainIdList []string) []model.CashFlowEntity
+	GetCashFlowsByBelongsDate(belongsDate time.Time) []model.CashFlowEntity
+	GetCashFlowsByCategoryId(categoryPlainId string) []model.CashFlowEntity
+	GetCashFlowsByCategoryName(categoryName string) []model.CashFlowEntity
+	GetCashFlowsByExactDesc(description string) []model.CashFlowEntity
+	GetCashFlowsByFuzzyDesc(description string) []model.CashFlowEntity
 	CountCashFLowsByCategoryId(categoryPlainId string) int64
-	InsertCashFlowByEntity(newEntity entity.CashFlowEntity) string
-	UpdateCashFlowByEntity(plainId string) entity.CashFlowEntity
-	DeleteCashFlowByObjectId(plainId string) entity.CashFlowEntity
-	DeleteCashFlowByBelongsDate(belongsDate time.Time) []entity.CashFlowEntity
+	InsertCashFlowByEntity(newEntity model.CashFlowEntity) string
+	UpdateCashFlowByEntity(plainId string) model.CashFlowEntity
+	DeleteCashFlowByObjectId(plainId string) model.CashFlowEntity
+	DeleteCashFlowByBelongsDate(belongsDate time.Time) []model.CashFlowEntity
 }
 
 func init() {

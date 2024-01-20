@@ -3,7 +3,7 @@ package cmd
 import (
 	"errors"
 
-	"github.com/emmettwoo/EMM-MoneyBox/api"
+	"github.com/emmettwoo/EMM-MoneyBox/controller"
 	"github.com/spf13/cobra"
 )
 
@@ -13,7 +13,7 @@ var startCmd4ApiServer = &cobra.Command{
 	Use:   "start",
 	Short: "start the api server",
 	Run: func(cmd *cobra.Command, args []string) {
-		api.StartServer(port4ApiServer)
+		controller.StartServer(port4ApiServer)
 	},
 }
 

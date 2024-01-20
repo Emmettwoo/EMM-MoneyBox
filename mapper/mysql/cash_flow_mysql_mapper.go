@@ -3,18 +3,19 @@ package mysql
 import (
 	"bytes"
 	"database/sql"
-	"github.com/emmettwoo/EMM-MoneyBox/entity"
+	"time"
+
+	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/emmettwoo/EMM-MoneyBox/util/database"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"time"
 )
 
 var cashFlowMySqlMapper CashFlowMySqlMapper
 
 type CashFlowMySqlMapper struct{}
 
-func (CashFlowMySqlMapper) GetCashFlowByObjectId(plainId string) entity.CashFlowEntity {
+func (CashFlowMySqlMapper) GetCashFlowByObjectId(plainId string) model.CashFlowEntity {
 
 	var sqlString bytes.Buffer
 	sqlString.WriteString("SELECT ID, CATEGORY_ID, BELONGS_DATE, FLOW_TYPE, AMOUNT, DESCRIPTION FROM ")
@@ -29,7 +30,7 @@ func (CashFlowMySqlMapper) GetCashFlowByObjectId(plainId string) entity.CashFlow
 		util.Logger.Errorw("query failed", "error", err)
 	}
 
-	var cashFlowEntity entity.CashFlowEntity
+	var cashFlowEntity model.CashFlowEntity
 	for rows.Next() {
 		cashFlowEntity = convertRow2CashFlowEntity(rows)
 		break
@@ -37,7 +38,7 @@ func (CashFlowMySqlMapper) GetCashFlowByObjectId(plainId string) entity.CashFlow
 	return cashFlowEntity
 }
 
-func (CashFlowMySqlMapper) GetCashFlowsByObjectIdArray(plainIdList []string) []entity.CashFlowEntity {
+func (CashFlowMySqlMapper) GetCashFlowsByObjectIdArray(plainIdList []string) []model.CashFlowEntity {
 
 	var sqlString bytes.Buffer
 	sqlString.WriteString("SELECT ID, CATEGORY_ID, BELONGS_DATE, FLOW_TYPE, AMOUNT, DESCRIPTION FROM ")
@@ -54,14 +55,14 @@ func (CashFlowMySqlMapper) GetCashFlowsByObjectIdArray(plainIdList []string) []e
 		util.Logger.Errorw("query failed", "error", err)
 	}
 
-	var targetEntityList = make([]entity.CashFlowEntity, len(plainIdList))
+	var targetEntityList = make([]model.CashFlowEntity, len(plainIdList))
 	for rows.Next() {
 		targetEntityList = append(targetEntityList, convertRow2CashFlowEntity(rows))
 	}
 	return targetEntityList
 }
 
-func (CashFlowMySqlMapper) GetCashFlowsByBelongsDate(belongsDate time.Time) []entity.CashFlowEntity {
+func (CashFlowMySqlMapper) GetCashFlowsByBelongsDate(belongsDate time.Time) []model.CashFlowEntity {
 
 	var sqlString bytes.Buffer
 	sqlString.WriteString("SELECT ID, CATEGORY_ID, BELONGS_DATE, FLOW_TYPE, AMOUNT, DESCRIPTION FROM ")
@@ -76,14 +77,14 @@ func (CashFlowMySqlMapper) GetCashFlowsByBelongsDate(belongsDate time.Time) []en
 		util.Logger.Errorw("query failed", "error", err)
 	}
 
-	var targetEntityList []entity.CashFlowEntity
+	var targetEntityList []model.CashFlowEntity
 	for rows.Next() {
 		targetEntityList = append(targetEntityList, convertRow2CashFlowEntity(rows))
 	}
 	return targetEntityList
 }
 
-func (CashFlowMySqlMapper) GetCashFlowsByCategoryId(categoryPlainId string) []entity.CashFlowEntity {
+func (CashFlowMySqlMapper) GetCashFlowsByCategoryId(categoryPlainId string) []model.CashFlowEntity {
 
 	var sqlString bytes.Buffer
 	sqlString.WriteString("SELECT ID, CATEGORY_ID, BELONGS_DATE, FLOW_TYPE, AMOUNT, DESCRIPTION FROM ")
@@ -98,14 +99,14 @@ func (CashFlowMySqlMapper) GetCashFlowsByCategoryId(categoryPlainId string) []en
 		util.Logger.Errorw("query failed", "error", err)
 	}
 
-	var targetEntityList []entity.CashFlowEntity
+	var targetEntityList []model.CashFlowEntity
 	for rows.Next() {
 		targetEntityList = append(targetEntityList, convertRow2CashFlowEntity(rows))
 	}
 	return targetEntityList
 }
 
-func (CashFlowMySqlMapper) GetCashFlowsByCategoryName(categoryName string) []entity.CashFlowEntity {
+func (CashFlowMySqlMapper) GetCashFlowsByCategoryName(categoryName string) []model.CashFlowEntity {
 
 	var targetCategoryEntity = categoryMySqlMapper.GetCategoryByName(categoryName)
 	if targetCategoryEntity.IsEmpty() {
@@ -116,7 +117,7 @@ func (CashFlowMySqlMapper) GetCashFlowsByCategoryName(categoryName string) []ent
 	return cashFlowMySqlMapper.GetCashFlowsByCategoryId(targetCategoryEntity.Id.Hex())
 }
 
-func (CashFlowMySqlMapper) GetCashFlowsByExactDesc(description string) []entity.CashFlowEntity {
+func (CashFlowMySqlMapper) GetCashFlowsByExactDesc(description string) []model.CashFlowEntity {
 
 	var sqlString bytes.Buffer
 	sqlString.WriteString("SELECT ID, CATEGORY_ID, BELONGS_DATE, FLOW_TYPE, AMOUNT, DESCRIPTION FROM ")
@@ -131,14 +132,14 @@ func (CashFlowMySqlMapper) GetCashFlowsByExactDesc(description string) []entity.
 		util.Logger.Errorw("query failed", "error", err)
 	}
 
-	var targetEntityList []entity.CashFlowEntity
+	var targetEntityList []model.CashFlowEntity
 	for rows.Next() {
 		targetEntityList = append(targetEntityList, convertRow2CashFlowEntity(rows))
 	}
 	return targetEntityList
 }
 
-func (CashFlowMySqlMapper) GetCashFlowsByFuzzyDesc(description string) []entity.CashFlowEntity {
+func (CashFlowMySqlMapper) GetCashFlowsByFuzzyDesc(description string) []model.CashFlowEntity {
 
 	var sqlString bytes.Buffer
 	sqlString.WriteString("SELECT ID, CATEGORY_ID, BELONGS_DATE, FLOW_TYPE, AMOUNT, DESCRIPTION FROM ")
@@ -153,7 +154,7 @@ func (CashFlowMySqlMapper) GetCashFlowsByFuzzyDesc(description string) []entity.
 		util.Logger.Errorw("query failed", "error", err)
 	}
 
-	var targetEntityList []entity.CashFlowEntity
+	var targetEntityList []model.CashFlowEntity
 	for rows.Next() {
 		targetEntityList = append(targetEntityList, convertRow2CashFlowEntity(rows))
 	}
@@ -184,7 +185,7 @@ func (CashFlowMySqlMapper) CountCashFLowsByCategoryId(categoryPlainId string) in
 	return rowsAffected
 }
 
-func (CashFlowMySqlMapper) InsertCashFlowByEntity(newEntity entity.CashFlowEntity) string {
+func (CashFlowMySqlMapper) InsertCashFlowByEntity(newEntity model.CashFlowEntity) string {
 
 	var operatingTime = time.Now()
 	newEntity.CreateTime = operatingTime
@@ -226,18 +227,18 @@ func (CashFlowMySqlMapper) InsertCashFlowByEntity(newEntity entity.CashFlowEntit
 	return newPlainId
 }
 
-func (CashFlowMySqlMapper) UpdateCashFlowByEntity(plainId string) entity.CashFlowEntity {
+func (CashFlowMySqlMapper) UpdateCashFlowByEntity(plainId string) model.CashFlowEntity {
 
 	var objectId = util.Convert2ObjectId(plainId)
 	if plainId == "" || objectId == primitive.NilObjectID {
 		util.Logger.Warnln("cash_flow's id is not acceptable")
-		return entity.CashFlowEntity{}
+		return model.CashFlowEntity{}
 	}
 
 	var targetEntity = cashFlowMySqlMapper.GetCashFlowByObjectId(plainId)
 	if targetEntity.IsEmpty() {
 		util.Logger.Infoln("cash_flow is not exist")
-		return entity.CashFlowEntity{}
+		return model.CashFlowEntity{}
 	}
 
 	// todo: update specific fields by passing params (category_name, belongs_date, flow_type, amount, description)
@@ -277,12 +278,12 @@ func (CashFlowMySqlMapper) UpdateCashFlowByEntity(plainId string) entity.CashFlo
 	return targetEntity
 }
 
-func (CashFlowMySqlMapper) DeleteCashFlowByObjectId(plainId string) entity.CashFlowEntity {
+func (CashFlowMySqlMapper) DeleteCashFlowByObjectId(plainId string) model.CashFlowEntity {
 
 	var targetEntity = cashFlowMySqlMapper.GetCashFlowByObjectId(plainId)
 	if targetEntity.IsEmpty() {
 		util.Logger.Infoln("cash_flow is not exist")
-		return entity.CashFlowEntity{}
+		return model.CashFlowEntity{}
 	}
 
 	var sqlString bytes.Buffer
@@ -311,7 +312,7 @@ func (CashFlowMySqlMapper) DeleteCashFlowByObjectId(plainId string) entity.CashF
 	return targetEntity
 }
 
-func (CashFlowMySqlMapper) DeleteCashFlowByBelongsDate(belongsDate time.Time) []entity.CashFlowEntity {
+func (CashFlowMySqlMapper) DeleteCashFlowByBelongsDate(belongsDate time.Time) []model.CashFlowEntity {
 
 	var cashFlowList = cashFlowMySqlMapper.GetCashFlowsByBelongsDate(belongsDate)
 	if cashFlowList == nil {
@@ -345,7 +346,7 @@ func (CashFlowMySqlMapper) DeleteCashFlowByBelongsDate(belongsDate time.Time) []
 	return cashFlowList
 }
 
-func convertRow2CashFlowEntity(rows *sql.Rows) entity.CashFlowEntity {
+func convertRow2CashFlowEntity(rows *sql.Rows) model.CashFlowEntity {
 
 	var id string
 	var categoryId string
@@ -359,7 +360,7 @@ func convertRow2CashFlowEntity(rows *sql.Rows) entity.CashFlowEntity {
 		util.Logger.Errorw("covert into entity failed", "error", err)
 	}
 
-	return entity.CashFlowEntity{
+	return model.CashFlowEntity{
 		Id:          util.Convert2ObjectId(id),
 		CategoryId:  util.Convert2ObjectId(categoryId),
 		BelongsDate: util.FormatDateFromStringWithDash(belongsDate),

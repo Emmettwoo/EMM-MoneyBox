@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/emmettwoo/EMM-MoneyBox/entity"
 	"github.com/emmettwoo/EMM-MoneyBox/mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -16,7 +16,7 @@ func CreateService(parentPlainId, categoryName string) error {
 		return errors.New("some required fields are empty")
 	}
 
-	var categoryEntity = entity.CategoryEntity{
+	var categoryEntity = model.CategoryEntity{
 		ParentId: primitive.NilObjectID,
 		Name:     categoryName,
 	}

@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/emmettwoo/EMM-MoneyBox/cmd/cash_flow_cmd"
 	"github.com/spf13/cobra"
 )
 
@@ -21,4 +22,7 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	// add command: cash
+	rootCmd.AddCommand(cash_flow_cmd.CashCmd)
 }
