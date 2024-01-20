@@ -4,6 +4,9 @@ import (
 	"fmt"
 
 	"github.com/emmettwoo/EMM-MoneyBox/cmd/cash_flow_cmd"
+	"github.com/emmettwoo/EMM-MoneyBox/cmd/category_cmd"
+	"github.com/emmettwoo/EMM-MoneyBox/cmd/manage_cmd"
+	"github.com/emmettwoo/EMM-MoneyBox/cmd/server_cmd"
 	"github.com/spf13/cobra"
 )
 
@@ -22,7 +25,8 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
-	// add command: cash
 	rootCmd.AddCommand(cash_flow_cmd.CashCmd)
+	rootCmd.AddCommand(manage_cmd.ManageCmd)
+	rootCmd.AddCommand(server_cmd.ServerCmd)
+	rootCmd.AddCommand(category_cmd.CategoryCmd)
 }
