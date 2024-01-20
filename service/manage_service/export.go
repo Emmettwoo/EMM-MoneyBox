@@ -6,7 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/emmettwoo/EMM-MoneyBox/mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/mapper/cash_flow_mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/mapper/category_mapper"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/xuri/excelize/v2"
 )
@@ -87,7 +88,7 @@ func exportData(file *excelize.File, fromDate, toDate string) {
 	var currentYearAndMonth = "nil"
 
 	for queryDateEnded.After(queryDateCurrent) {
-		cashFlowArray := mapper.CashFlowCommonMapper.GetCashFlowsByBelongsDate(queryDateCurrent)
+		cashFlowArray := cash_flow_mapper.INSTANCE.GetCashFlowsByBelongsDate(queryDateCurrent)
 		if len(cashFlowArray) == 0 {
 			util.Logger.Debugf("%s's flow is empty.\n", util.FormatDateToStringWithoutDash(queryDateCurrent))
 			queryDateCurrent = queryDateCurrent.AddDate(0, 0, 1)
@@ -122,7 +123,7 @@ func exportData(file *excelize.File, fromDate, toDate string) {
 			writeExcelRow(file, currentYearAndMonth, "A"+cashFlowIndexInString, cashFlow.Id.Hex())
 			writeExcelRow(file, currentYearAndMonth, "B"+cashFlowIndexInString, cashFlow.CategoryId.Hex())
 			writeExcelRow(file, currentYearAndMonth, "C"+cashFlowIndexInString,
-				mapper.CategoryCommonMapper.GetCategoryByObjectId(cashFlow.CategoryId.Hex()).Name)
+				category_mapper.INSTANCE.GetCategoryByObjectId(cashFlow.CategoryId.Hex()).Name)
 			writeExcelRow(file, currentYearAndMonth, "D"+cashFlowIndexInString, queryDateCurrentInString)
 			writeExcelRow(file, currentYearAndMonth, "E"+cashFlowIndexInString, cashFlow.FlowType)
 			writeExcelRow(file, currentYearAndMonth, "F"+cashFlowIndexInString, cashFlow.Amount)

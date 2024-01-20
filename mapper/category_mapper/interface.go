@@ -1,15 +1,11 @@
-package mapper
+package category_mapper
 
 import (
-	"github.com/emmettwoo/EMM-MoneyBox/mapper/mongodb"
-	"github.com/emmettwoo/EMM-MoneyBox/mapper/mysql"
 	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 )
 
-var categoryMongoDbMapper CategoryMapper
-var categoryMySqlMapper CategoryMapper
-var CategoryCommonMapper CategoryMapper
+var INSTANCE CategoryMapper
 
 type CategoryMapper interface {
 	GetCategoryByObjectId(plainId string) model.CategoryEntity
@@ -21,18 +17,11 @@ type CategoryMapper interface {
 }
 
 func init() {
-	categoryMongoDbMapper = mongodb.CategoryMongoDbMapper{}
-	categoryMySqlMapper = mysql.CategoryMySqlMapper{}
-	CategoryCommonMapper = GetCategoryMapper()
-}
-
-func GetCategoryMapper() CategoryMapper {
-
 	switch util.GetConfigByKey("db.type") {
 	case "mongodb":
-		return categoryMongoDbMapper
+		INSTANCE = CategoryMongoDbMapper{}
 	case "mysql":
-		return categoryMySqlMapper
+		INSTANCE = CategoryMySqlMapper{}
 	default:
 		panic("database type not supported")
 	}

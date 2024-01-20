@@ -3,7 +3,9 @@ package category_service
 import (
 	"errors"
 	"fmt"
-	"github.com/emmettwoo/EMM-MoneyBox/mapper"
+
+	"github.com/emmettwoo/EMM-MoneyBox/mapper/cash_flow_mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/mapper/category_mapper"
 )
 
 func DeleteService(plainId, categoryName string) error {
@@ -47,13 +49,17 @@ func isDeleteFieldsConflicted(plainId, categoryName string) bool {
 
 func deleteById(plainId string) error {
 
-	var existCategoryEntity = mapper.CategoryCommonMapper.GetCategoryByObjectId(plainId)
+	var existCategoryEntity = category_mapper.INSTANCE.GetCategoryByObjectId(plainId)
 	if existCategoryEntity.IsEmpty() {
 		fmt.Println("category not found")
 		return nil
 	}
 
-	existCategoryEntity = mapper.CategoryCommonMapper.DeleteCategoryByObjectId(plainId)
+	if cash_flow_mapper.INSTANCE.CountCashFLowsByCategoryId(existCategoryEntity.Id.Hex()) != 0 {
+		return errors.New("can not delete a category which has cash_flows refer to")
+	}
+
+	existCategoryEntity = category_mapper.INSTANCE.DeleteCategoryByObjectId(plainId)
 	if existCategoryEntity.IsEmpty() {
 		return errors.New("category delete failed")
 	}
@@ -63,12 +69,17 @@ func deleteById(plainId string) error {
 
 func deleteByName(categoryName string) error {
 
-	var existCategoryEntity = mapper.CategoryCommonMapper.GetCategoryByName(categoryName)
+	var existCategoryEntity = category_mapper.INSTANCE.GetCategoryByName(categoryName)
 	if existCategoryEntity.IsEmpty() {
 		fmt.Println("category not found")
 		return nil
 	}
-	existCategoryEntity = mapper.CategoryCommonMapper.DeleteCategoryByObjectId(existCategoryEntity.Id.Hex())
+
+	if cash_flow_mapper.INSTANCE.CountCashFLowsByCategoryId(existCategoryEntity.Id.Hex()) != 0 {
+		return errors.New("can not delete a category which has cash_flows refer to")
+	}
+
+	existCategoryEntity = category_mapper.INSTANCE.DeleteCategoryByObjectId(existCategoryEntity.Id.Hex())
 	if existCategoryEntity.IsEmpty() {
 		return errors.New("category delete failed")
 	}

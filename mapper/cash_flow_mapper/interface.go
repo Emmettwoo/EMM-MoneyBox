@@ -1,24 +1,19 @@
-package mapper
+package cash_flow_mapper
 
 import (
 	"time"
 
-	"github.com/emmettwoo/EMM-MoneyBox/mapper/mongodb"
-	"github.com/emmettwoo/EMM-MoneyBox/mapper/mysql"
 	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 )
 
-var cashFlowMongoDbMapper CashFlowMapper
-var cashFlowMySqlMapper CashFlowMapper
-var CashFlowCommonMapper CashFlowMapper
+var INSTANCE CashFlowMapper
 
 type CashFlowMapper interface {
 	GetCashFlowByObjectId(plainId string) model.CashFlowEntity
 	GetCashFlowsByObjectIdArray(plainIdList []string) []model.CashFlowEntity
 	GetCashFlowsByBelongsDate(belongsDate time.Time) []model.CashFlowEntity
 	GetCashFlowsByCategoryId(categoryPlainId string) []model.CashFlowEntity
-	GetCashFlowsByCategoryName(categoryName string) []model.CashFlowEntity
 	GetCashFlowsByExactDesc(description string) []model.CashFlowEntity
 	GetCashFlowsByFuzzyDesc(description string) []model.CashFlowEntity
 	CountCashFLowsByCategoryId(categoryPlainId string) int64
@@ -29,18 +24,11 @@ type CashFlowMapper interface {
 }
 
 func init() {
-	cashFlowMongoDbMapper = mongodb.CashFlowMongoDbMapper{}
-	cashFlowMySqlMapper = mysql.CashFlowMySqlMapper{}
-	CashFlowCommonMapper = GetCashFlowMapper()
-}
-
-func GetCashFlowMapper() CashFlowMapper {
-
 	switch util.GetConfigByKey("db.type") {
 	case "mongodb":
-		return cashFlowMongoDbMapper
+		INSTANCE = CashFlowMongoDbMapper{}
 	case "mysql":
-		return cashFlowMySqlMapper
+		INSTANCE = CashFlowMySqlMapper{}
 	default:
 		panic("database type not supported")
 	}

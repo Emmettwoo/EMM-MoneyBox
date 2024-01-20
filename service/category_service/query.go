@@ -3,7 +3,8 @@ package category_service
 import (
 	"errors"
 	"fmt"
-	"github.com/emmettwoo/EMM-MoneyBox/mapper"
+
+	"github.com/emmettwoo/EMM-MoneyBox/mapper/category_mapper"
 )
 
 func QueryService(plainId, parentPlainId, categoryName string) error {
@@ -62,7 +63,7 @@ func isQueryFieldsConflicted(plainId, parentPlainId, name string) bool {
 
 func queryById(plainId string) {
 
-	categoryEntity := mapper.CategoryCommonMapper.GetCategoryByObjectId(plainId)
+	categoryEntity := category_mapper.INSTANCE.GetCategoryByObjectId(plainId)
 	if categoryEntity.IsEmpty() {
 		fmt.Println("category not found")
 		return
@@ -72,7 +73,7 @@ func queryById(plainId string) {
 
 func queryByParentId(plainParentId string) {
 
-	matchedCategoryList := mapper.CategoryCommonMapper.GetCategoryByParentId(plainParentId)
+	matchedCategoryList := category_mapper.INSTANCE.GetCategoryByParentId(plainParentId)
 	if len(matchedCategoryList) == 0 {
 		fmt.Println("no matched categories")
 		return
@@ -85,7 +86,7 @@ func queryByParentId(plainParentId string) {
 
 func queryByName(categoryName string) {
 
-	categoryEntity := mapper.CategoryCommonMapper.GetCategoryByName(categoryName)
+	categoryEntity := category_mapper.INSTANCE.GetCategoryByName(categoryName)
 	if categoryEntity.IsEmpty() {
 		fmt.Println("category not found")
 		return

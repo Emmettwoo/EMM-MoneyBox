@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/emmettwoo/EMM-MoneyBox/mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/mapper/cash_flow_mapper"
 	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 )
@@ -50,7 +50,7 @@ func IsQueryFieldsConflicted(plainId, belongsDate, exactDescription, fuzzyDescri
 
 func QueryById(plainId string) (model.CashFlowEntity, error) {
 
-	cashFlowEntity := mapper.CashFlowCommonMapper.GetCashFlowByObjectId(plainId)
+	cashFlowEntity := cash_flow_mapper.INSTANCE.GetCashFlowByObjectId(plainId)
 	if cashFlowEntity.IsEmpty() {
 		return model.CashFlowEntity{}, errors.New("cash_flow not found")
 	}
@@ -64,17 +64,17 @@ func QueryByDate(belongsDate string) ([]model.CashFlowEntity, error) {
 		return []model.CashFlowEntity{}, errors.New("belongs_date error, try format like 19700101")
 	}
 
-	matchedCashFlowList := mapper.CashFlowCommonMapper.GetCashFlowsByBelongsDate(queryDate)
+	matchedCashFlowList := cash_flow_mapper.INSTANCE.GetCashFlowsByBelongsDate(queryDate)
 	// todo(emmett): when query result no match, consider return empty array rather than a nil interface.
 	return matchedCashFlowList, nil
 }
 
 func QueryByExactDescription(exactDescription string) ([]model.CashFlowEntity, error) {
-	matchedCashFlowList := mapper.CashFlowCommonMapper.GetCashFlowsByExactDesc(exactDescription)
+	matchedCashFlowList := cash_flow_mapper.INSTANCE.GetCashFlowsByExactDesc(exactDescription)
 	return matchedCashFlowList, nil
 }
 
 func QueryByFuzzyDescription(fuzzyDescription string) ([]model.CashFlowEntity, error) {
-	matchedCashFlowList := mapper.CashFlowCommonMapper.GetCashFlowsByFuzzyDesc(fuzzyDescription)
+	matchedCashFlowList := cash_flow_mapper.INSTANCE.GetCashFlowsByFuzzyDesc(fuzzyDescription)
 	return matchedCashFlowList, nil
 }

@@ -1,4 +1,4 @@
-package mongodb
+package category_mapper
 
 import (
 	"time"
@@ -9,8 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-var categoryMongoDbMapper CategoryMongoDbMapper
 
 type CategoryMongoDbMapper struct{}
 
@@ -128,14 +126,8 @@ func (CategoryMongoDbMapper) DeleteCategoryByObjectId(plainId string) model.Cate
 		return model.CategoryEntity{}
 	}
 
-	// can not delete a category that has referred cash_flows.
-	if cashFlowMongoDbMapper.CountCashFLowsByCategoryId(targetEntity.Id.Hex()) != 0 {
-		util.Logger.Infoln("can not delete a category which has cash_flows refer to")
-		return model.CategoryEntity{}
-	}
-
 	// can not delete a category that has referred child-categories.
-	if len(categoryMongoDbMapper.GetCategoryByParentId(plainId)) != 0 {
+	if len(INSTANCE.GetCategoryByParentId(plainId)) != 0 {
 		util.Logger.Infoln("can not delete a category which has child-categories refer to")
 		return model.CategoryEntity{}
 	}

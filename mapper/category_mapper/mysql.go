@@ -1,4 +1,4 @@
-package mysql
+package category_mapper
 
 import (
 	"bytes"
@@ -10,8 +10,6 @@ import (
 	"github.com/emmettwoo/EMM-MoneyBox/util/database"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-var categoryMySqlMapper CategoryMySqlMapper
 
 type CategoryMySqlMapper struct{}
 
@@ -123,7 +121,7 @@ func (CategoryMySqlMapper) InsertCategoryByEntity(newEntity model.CategoryEntity
 
 func (CategoryMySqlMapper) UpdateCategoryByEntity(plainId string) model.CategoryEntity {
 
-	var targetEntity = categoryMySqlMapper.GetCategoryByObjectId(plainId)
+	var targetEntity = INSTANCE.GetCategoryByObjectId(plainId)
 	if targetEntity.IsEmpty() {
 		util.Logger.Infoln("category is not exist")
 		return model.CategoryEntity{}
@@ -165,20 +163,14 @@ func (CategoryMySqlMapper) UpdateCategoryByEntity(plainId string) model.Category
 
 func (CategoryMySqlMapper) DeleteCategoryByObjectId(plainId string) model.CategoryEntity {
 
-	var targetEntity = categoryMySqlMapper.GetCategoryByObjectId(plainId)
+	var targetEntity = INSTANCE.GetCategoryByObjectId(plainId)
 	if targetEntity.IsEmpty() {
 		util.Logger.Infoln("category is not exist")
 		return model.CategoryEntity{}
 	}
 
-	// can not delete a category that has referred cash_flows.
-	if cashFlowMySqlMapper.CountCashFLowsByCategoryId(targetEntity.Id.Hex()) != 0 {
-		util.Logger.Infoln("can not delete a category which has cash_flows refer to")
-		return model.CategoryEntity{}
-	}
-
 	// can not delete a category that has referred child-categories.
-	if len(categoryMySqlMapper.GetCategoryByParentId(plainId)) != 0 {
+	if len(INSTANCE.GetCategoryByParentId(plainId)) != 0 {
 		util.Logger.Infoln("can not delete a category which has child-categories refer to")
 		return model.CategoryEntity{}
 	}

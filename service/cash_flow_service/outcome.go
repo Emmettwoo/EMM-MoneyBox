@@ -4,7 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/emmettwoo/EMM-MoneyBox/mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/mapper/cash_flow_mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/mapper/category_mapper"
 	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/shopspring/decimal"
@@ -16,7 +17,7 @@ func SaveOutcome(belongsDate, categoryName string, amount float64, description s
 	amount, _ = decimal.NewFromFloat(amount).Round(2).Float64()
 
 	// 必填參數: 類別
-	categoryEntity := mapper.CategoryCommonMapper.GetCategoryByName(categoryName)
+	categoryEntity := category_mapper.INSTANCE.GetCategoryByName(categoryName)
 	if categoryEntity.IsEmpty() {
 		return model.CashFlowEntity{}, errors.New("category does not exist")
 	}
@@ -27,7 +28,7 @@ func SaveOutcome(belongsDate, categoryName string, amount float64, description s
 		date = util.FormatDateFromStringWithoutDash(belongsDate)
 	}
 
-	newCashFlowId := mapper.CashFlowCommonMapper.InsertCashFlowByEntity(model.CashFlowEntity{
+	newCashFlowId := cash_flow_mapper.INSTANCE.InsertCashFlowByEntity(model.CashFlowEntity{
 		CategoryId:  categoryEntity.Id,
 		BelongsDate: date,
 		FlowType:    "OUTCOME",
@@ -38,7 +39,7 @@ func SaveOutcome(belongsDate, categoryName string, amount float64, description s
 		return model.CashFlowEntity{}, errors.New("cash_flow create failed")
 	}
 
-	var newCashFlow = mapper.CashFlowCommonMapper.GetCashFlowByObjectId(newCashFlowId)
+	var newCashFlow = cash_flow_mapper.INSTANCE.GetCashFlowByObjectId(newCashFlowId)
 	return newCashFlow, nil
 }
 

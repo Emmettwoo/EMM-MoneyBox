@@ -1,4 +1,4 @@
-package mongodb
+package cash_flow_mapper
 
 import (
 	"time"
@@ -9,8 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-var cashFlowMongoDbMapper CashFlowMongoDbMapper
 
 type CashFlowMongoDbMapper struct{}
 
@@ -114,17 +112,6 @@ func (CashFlowMongoDbMapper) CountCashFLowsByCategoryId(categoryPlainId string) 
 	defer database.CloseMongoDbConnection()
 
 	return database.CountInMongoDB(filter)
-}
-
-func (CashFlowMongoDbMapper) GetCashFlowsByCategoryName(categoryName string) []model.CashFlowEntity {
-
-	var categoryEntity = categoryMongoDbMapper.GetCategoryByName(categoryName)
-	if categoryEntity.IsEmpty() {
-		util.Logger.Warnln("category name not existed")
-		return nil
-	}
-
-	return cashFlowMongoDbMapper.GetCashFlowsByCategoryId(categoryEntity.Id.Hex())
 }
 
 func (CashFlowMongoDbMapper) GetCashFlowsByExactDesc(description string) []model.CashFlowEntity {
@@ -251,7 +238,7 @@ func (CashFlowMongoDbMapper) DeleteCashFlowByBelongsDate(belongsDate time.Time) 
 		primitive.E{Key: "belongs_date", Value: belongsDate},
 	}
 
-	var cashFlowList = cashFlowMongoDbMapper.GetCashFlowsByBelongsDate(belongsDate)
+	var cashFlowList = INSTANCE.GetCashFlowsByBelongsDate(belongsDate)
 	if cashFlowList == nil {
 		util.Logger.Infoln("no cash_flow(s) found")
 		return []model.CashFlowEntity{}

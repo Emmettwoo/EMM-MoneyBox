@@ -6,7 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/emmettwoo/EMM-MoneyBox/mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/mapper/cash_flow_mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/mapper/category_mapper"
 	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"github.com/xuri/excelize/v2"
@@ -161,7 +162,7 @@ func handleCategoryInfo(categoryId, categoryName string) string {
 
 	// use category id to fetch first
 	if categoryId != "" {
-		var categoryEntity = mapper.CategoryCommonMapper.GetCategoryByObjectId(categoryId)
+		var categoryEntity = category_mapper.INSTANCE.GetCategoryByObjectId(categoryId)
 		if !categoryEntity.IsEmpty() {
 			return categoryEntity.Id.Hex()
 		}
@@ -174,14 +175,14 @@ func handleCategoryInfo(categoryId, categoryName string) string {
 	}
 
 	// use category name to fetch correct id
-	categoryEntity := mapper.CategoryCommonMapper.GetCategoryByName(categoryName)
+	categoryEntity := category_mapper.INSTANCE.GetCategoryByName(categoryName)
 	if !categoryEntity.IsEmpty() {
 		return categoryEntity.Id.Hex()
 	}
 	util.Logger.Warnw("category not existed", "category_name", categoryName)
 
 	// create new category for this flow
-	var plainId = mapper.CategoryCommonMapper.InsertCategoryByEntity(model.CategoryEntity{
+	var plainId = category_mapper.INSTANCE.InsertCategoryByEntity(model.CategoryEntity{
 		Name:   categoryName,
 		Remark: "create by import",
 	})
@@ -192,7 +193,7 @@ func saveIntoDB(cashFlowMapByColumnList []map[string]string) {
 	for _, cashFlowMapByColumn := range cashFlowMapByColumnList {
 		var cashFlowEntity = model.CashFlowEntity{}.Build(cashFlowMapByColumn)
 		if cashFlowEntity.Id != primitive.NilObjectID {
-			var existedCashFlow = mapper.CashFlowCommonMapper.GetCashFlowByObjectId(cashFlowEntity.Id.Hex())
+			var existedCashFlow = cash_flow_mapper.INSTANCE.GetCashFlowByObjectId(cashFlowEntity.Id.Hex())
 			if !existedCashFlow.IsEmpty() {
 				util.Logger.Warnw("cash_flow existed, ignored import.",
 					sheetRowNumberLabel, cashFlowMapByColumn[sheetRowNumberLabel],
@@ -203,7 +204,7 @@ func saveIntoDB(cashFlowMapByColumnList []map[string]string) {
 				continue
 			}
 		}
-		var newPlainId = mapper.CashFlowCommonMapper.InsertCashFlowByEntity(cashFlowEntity)
+		var newPlainId = cash_flow_mapper.INSTANCE.InsertCashFlowByEntity(cashFlowEntity)
 		cashFlowEntity.Id = util.Convert2ObjectId(newPlainId)
 		util.Logger.Debug("cash_flow inserted: " + cashFlowEntity.ToString())
 		fmt.Println("succeed: row " + cashFlowMapByColumn[sheetRowNumberLabel] + ": cash_flow saved")

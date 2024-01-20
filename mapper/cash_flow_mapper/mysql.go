@@ -1,4 +1,4 @@
-package mysql
+package cash_flow_mapper
 
 import (
 	"bytes"
@@ -10,8 +10,6 @@ import (
 	"github.com/emmettwoo/EMM-MoneyBox/util/database"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-var cashFlowMySqlMapper CashFlowMySqlMapper
 
 type CashFlowMySqlMapper struct{}
 
@@ -104,17 +102,6 @@ func (CashFlowMySqlMapper) GetCashFlowsByCategoryId(categoryPlainId string) []mo
 		targetEntityList = append(targetEntityList, convertRow2CashFlowEntity(rows))
 	}
 	return targetEntityList
-}
-
-func (CashFlowMySqlMapper) GetCashFlowsByCategoryName(categoryName string) []model.CashFlowEntity {
-
-	var targetCategoryEntity = categoryMySqlMapper.GetCategoryByName(categoryName)
-	if targetCategoryEntity.IsEmpty() {
-		util.Logger.Infoln("category is not exist")
-		return nil
-	}
-
-	return cashFlowMySqlMapper.GetCashFlowsByCategoryId(targetCategoryEntity.Id.Hex())
 }
 
 func (CashFlowMySqlMapper) GetCashFlowsByExactDesc(description string) []model.CashFlowEntity {
@@ -235,7 +222,7 @@ func (CashFlowMySqlMapper) UpdateCashFlowByEntity(plainId string) model.CashFlow
 		return model.CashFlowEntity{}
 	}
 
-	var targetEntity = cashFlowMySqlMapper.GetCashFlowByObjectId(plainId)
+	var targetEntity = INSTANCE.GetCashFlowByObjectId(plainId)
 	if targetEntity.IsEmpty() {
 		util.Logger.Infoln("cash_flow is not exist")
 		return model.CashFlowEntity{}
@@ -280,7 +267,7 @@ func (CashFlowMySqlMapper) UpdateCashFlowByEntity(plainId string) model.CashFlow
 
 func (CashFlowMySqlMapper) DeleteCashFlowByObjectId(plainId string) model.CashFlowEntity {
 
-	var targetEntity = cashFlowMySqlMapper.GetCashFlowByObjectId(plainId)
+	var targetEntity = INSTANCE.GetCashFlowByObjectId(plainId)
 	if targetEntity.IsEmpty() {
 		util.Logger.Infoln("cash_flow is not exist")
 		return model.CashFlowEntity{}
@@ -314,7 +301,7 @@ func (CashFlowMySqlMapper) DeleteCashFlowByObjectId(plainId string) model.CashFl
 
 func (CashFlowMySqlMapper) DeleteCashFlowByBelongsDate(belongsDate time.Time) []model.CashFlowEntity {
 
-	var cashFlowList = cashFlowMySqlMapper.GetCashFlowsByBelongsDate(belongsDate)
+	var cashFlowList = INSTANCE.GetCashFlowsByBelongsDate(belongsDate)
 	if cashFlowList == nil {
 		util.Logger.Infoln("no cash_flow(s) found")
 		return cashFlowList

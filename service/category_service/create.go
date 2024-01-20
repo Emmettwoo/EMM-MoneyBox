@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/emmettwoo/EMM-MoneyBox/mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/mapper/category_mapper"
 	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,12 +24,12 @@ func CreateService(parentPlainId, categoryName string) error {
 		categoryEntity.ParentId = util.Convert2ObjectId(parentPlainId)
 	}
 
-	var newCategoryPlainId = mapper.CategoryCommonMapper.InsertCategoryByEntity(categoryEntity)
+	var newCategoryPlainId = category_mapper.INSTANCE.InsertCategoryByEntity(categoryEntity)
 	if newCategoryPlainId == "" {
 		return errors.New("category create failed")
 	}
 
-	var newCategoryEntity = mapper.CategoryCommonMapper.GetCategoryByObjectId(newCategoryPlainId)
+	var newCategoryEntity = category_mapper.INSTANCE.GetCategoryByObjectId(newCategoryPlainId)
 	fmt.Println("category ", 0, ": ", newCategoryEntity.ToString())
 	return nil
 }

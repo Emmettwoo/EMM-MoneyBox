@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/emmettwoo/EMM-MoneyBox/mapper"
+	"github.com/emmettwoo/EMM-MoneyBox/mapper/cash_flow_mapper"
 	"github.com/emmettwoo/EMM-MoneyBox/model"
 	"github.com/emmettwoo/EMM-MoneyBox/util"
 )
@@ -34,12 +34,12 @@ func IsDeleteFieldsConflicted(plainId, belongsDate string) bool {
 
 func DeleteById(plainId string) (model.CashFlowEntity, error) {
 
-	var existCashFlowEntity = mapper.CashFlowCommonMapper.GetCashFlowByObjectId(plainId)
+	var existCashFlowEntity = cash_flow_mapper.INSTANCE.GetCashFlowByObjectId(plainId)
 	if existCashFlowEntity.IsEmpty() {
 		return model.CashFlowEntity{}, errors.New("cash_flow not found")
 	}
 
-	existCashFlowEntity = mapper.CashFlowCommonMapper.DeleteCashFlowByObjectId(plainId)
+	existCashFlowEntity = cash_flow_mapper.INSTANCE.DeleteCashFlowByObjectId(plainId)
 	if existCashFlowEntity.IsEmpty() {
 		return model.CashFlowEntity{}, errors.New("cash_flow delete failed")
 	}
@@ -53,6 +53,6 @@ func DeleteByDate(belongsDate string) ([]model.CashFlowEntity, error) {
 		return []model.CashFlowEntity{}, errors.New("belongs_date error, try format like 19700101")
 	}
 
-	cashFlowList := mapper.CashFlowCommonMapper.DeleteCashFlowByBelongsDate(deleteDate)
+	cashFlowList := cash_flow_mapper.INSTANCE.DeleteCashFlowByBelongsDate(deleteDate)
 	return cashFlowList, nil
 }
