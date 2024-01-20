@@ -253,7 +253,7 @@ func (CashFlowMongoDbMapper) DeleteCashFlowByBelongsDate(belongsDate time.Time) 
 	var cashFlowList = cashFlowMongoDbMapper.GetCashFlowsByBelongsDate(belongsDate)
 	if cashFlowList == nil {
 		util.Logger.Infoln("no cash_flow(s) found")
-		return cashFlowList
+		return []entity.CashFlowEntity{}
 	}
 
 	database.OpenMongoDbConnection(database.CashFlowTableName)
